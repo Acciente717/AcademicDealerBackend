@@ -18,3 +18,6 @@ python 3.5.6
 
 Django 2.2
 ```
+## Test HTTP Request Handler
+
+Basic HTTP requests handler is implemented. Now you can send HTTP request to "127.0.0.1:8000/ResponseTest/" for an echo test.
