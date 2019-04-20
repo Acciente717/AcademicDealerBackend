@@ -1,0 +1,21 @@
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="/records/insert/" method="POST">
+    {% csrf_token %}
+    New record:<br>
+    <input type="text" name="input_str" value=""><br>
+    <input type="submit" value="Add">
+</form>
+<br>
+
+{% if records_list %}
+<form action="/records/delete/" method="POST">
+    {% csrf_token %}
+    {% for record in records_list %}
+    <input type="checkbox" name="__record_id.{{ record.id }}"> {{ record.record_text }}<br>
+    {% endfor %}
+    <input type="submit" value="Delete">
+</form>
+{% else %}
+    <p>No record is available.</p>
+{% endif %}
