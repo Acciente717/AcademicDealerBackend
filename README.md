@@ -9,6 +9,8 @@ Operating system: Linux
 Python version: 3.5
 
 Django version: 2.2
+
+MySQL version: 8.0.16
 ```
 For your reference, the initial code is written in
 ```
