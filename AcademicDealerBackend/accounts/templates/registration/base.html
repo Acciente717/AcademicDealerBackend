@@ -9,9 +9,9 @@
     <h1>Django Simple Login</h1>
     {% if user.is_authenticated %}
       Hi {{ user.username }}!
-      <a href="{% url 'accounts:logout' %}">logout</a>
+      <a href="{% url 'logout' %}">logout</a>
     {% else %}
-      <a href="{% url 'accounts:login' %}">login</a>
+      <a href="{% url 'login' %}">login</a>
     {% endif %}
   </header>
   <hr>
