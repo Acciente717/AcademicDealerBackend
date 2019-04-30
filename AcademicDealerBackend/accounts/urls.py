@@ -7,5 +7,5 @@ app_name = 'accounts'
 
 urlpatterns = [
     path('', include('django.contrib.auth.urls')),
-    path('accounts/logout/', auth_views.LogoutView.as_view(redirect_field_name=None)),
+    path('signup/', views.SignUp.as_view(), name='signup'),
 ]
