@@ -29,9 +29,13 @@ ALLOWED_HOSTS = []
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
-
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'email@163.com'
+DEFAULT_FROM_EMAIL = 'email@163.com'
+EMAIL_HOST_PASSWORD = 'your_password'
 
 # Application definition
 
