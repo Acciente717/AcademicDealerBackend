@@ -41,6 +41,7 @@ EMAIL_HOST_PASSWORD = 'your_password'
 
 INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
+    'projectinfo.apps.ProjectinfoConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

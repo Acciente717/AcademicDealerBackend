@@ -1,0 +1,11 @@
+<h1>{{ project.title }}</h1>
+
+<p> {{ project.text }} </p>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% for reply in project.reply_set.all %}
+    <li>
+        <p>{{ reply.text }}</p>
+    </li>
+{% endfor %}

@@ -1,0 +1,11 @@
+<h1>Project Topics</h1>
+
+{% if topic_list %}
+    <ul>
+    {% for topic in topic_list %}
+        <li><a href="{% url 'topic' topic.id %}">{{ topic.topic_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No projectinfo are available.</p>
+{% endif %}

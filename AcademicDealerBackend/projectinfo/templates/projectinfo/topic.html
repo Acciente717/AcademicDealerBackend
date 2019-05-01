@@ -1,0 +1,10 @@
+<h1>{{ topic.topic_text }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% for project in topic.project_set.all %}
+    <li>
+        <a href="{% url 'project' topic_id=topic.id project_id=project.id %}">{{ project.title }}</a>
+        <p>{{ project.text }}</p>
+    </li>
+{% endfor %}
