@@ -5,6 +5,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
+from .forms import ProjectForm
 from .models import Topic, Project, Reply
 
 class IndexView(generic.ListView):
@@ -38,24 +39,23 @@ class ProjectView(generic.DetailView):
 @method_decorator(login_required, name='dispatch')
 class TopicCreateProjectView(generic.CreateView):
     model = Project
-    # form_class = ProjectForm
+    form_class = ProjectForm
     pk_url_kwarg = 'topic_id'
     template_name = 'projectinfo/create_project.html'
-    fields = ['title', 'text']
 
     def form_valid(self, form):
-        form.instance.topic_id = Topic.objects.get(id = self.kwargs.get('topic_id'))
+        form.instance.topic = Topic.objects.get(id = self.kwargs.get('topic_id'))
         form.instance.owner = self.request.user
+        print("after this")
+        print("id is ", self.kwargs.get('topic_id'))
         return super().form_valid(form)
     
     def post(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return HttpResponseForbidden()
         self.object = self.get_object()
         return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse('project', kwargs={'topic_id': self.object.topic_id_id, 'project_id':self.object.id})
+        return reverse('project', kwargs={'topic_id': self.object.topic_id, 'project_id':self.object.id})
 
 class TopicDetail(generic.View):
     def get(self, request, *args, **kwargs):
