@@ -9,4 +9,11 @@
     </li>
 {% endfor %}
 
-<a href="{% url 'create_project' topic_id=topic.id %}">Want to create a new topic?</a>
+{# <a href="{% url 'create_project' topic_id=topic.id %}">Want to create a new topic?</a> #}
+
+<h2>Create Project in Topic {{ topic.topic_text }}</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Create this Project</button>
+</form>

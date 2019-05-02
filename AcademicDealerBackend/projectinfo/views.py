@@ -14,13 +14,18 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         return Topic.objects.order_by('created_date')
 
-class TopicView(generic.DetailView):
+class TopicDisplayView(generic.DetailView):
     model = Topic
     template_name = 'projectinfo/topic.html'
     pk_url_kwarg = 'topic_id'
 
     class Meta:
         ordering = ['modified_date']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ProjectForm()
+        return context
 
 class ProjectView(generic.DetailView):
     model = Project
@@ -30,15 +35,30 @@ class ProjectView(generic.DetailView):
     class Meta:
         ordering = ['modified_date']
 
-class CreateProjectView(generic.CreateView):
+class TopicCreateProjectView(generic.CreateView):
     model = Topic
     form_class = ProjectForm
     pk_url_kwarg = 'topic_id'
     template_name = 'projectinfo/create_project.html'
 
-    def form_valid(self, form):
-        form.instance.topic_id = Topic.objects.get(id = self.kwargs.get('topic_id'))
-        return super(CreateProjectView, self).form_valid(form)
+    # def form_valid(self, form):
+    #     form.instance.topic_id = Topic.objects.get(id = self.kwargs.get('topic_id'))
+    #     return super(CreateProjectView, self).form_valid(form)
+    
+    def post(self, request, *args, **kwargs):
+        # if not request.user.is_authenticated:
+        #     return HttpResponseForbidden()
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse('project', kwargs={'topic_id': self.object.topic_id_id, 'project_id':self.object.id})
+
+class TopicDetail(generic.View):
+    def get(self, request, *args, **kwargs):
+        view = TopicDisplayView.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        view = TopicCreateProjectView.as_view()
+        return view(request, *args, **kwargs)
