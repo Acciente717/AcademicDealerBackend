@@ -1,11 +1,11 @@
-from django import forms
-from django.forms import ModelForm
-from .models import Topic, Project, Reply
+# from django import forms
+# from django.forms import ModelForm
+# from .models import Topic, Project, Reply
 
-class ProjectForm(ModelForm):
-    class Meta:
-        model = Project
-        fields = ['topic_id', 'title', 'text']
+# class ProjectForm(ModelForm):
+#     class Meta:
+#         model = Project
+#         fields = ['topic_id', 'title', 'text', 'owner']
 
     # def save(self, commit=True):
     #     user = super(UserCreationForm, self).save(commit=False)

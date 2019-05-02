@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_URL = 'accounts/login'
+LOGIN_URL = '/accounts/login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -37,6 +37,7 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = 'email@163.com'
 DEFAULT_FROM_EMAIL = 'email@163.com'
 EMAIL_HOST_PASSWORD = 'your_password'
+AUTH_USER_MODEL = 'accounts.MyUser'
 
 # Application definition
 

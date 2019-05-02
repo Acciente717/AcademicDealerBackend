@@ -3,9 +3,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from .models import Topic, Project, Reply
-from .forms import ProjectForm
 
 class IndexView(generic.ListView):
     template_name = 'projectinfo/index.html'
@@ -35,15 +35,18 @@ class ProjectView(generic.DetailView):
     class Meta:
         ordering = ['modified_date']
 
+@method_decorator(login_required, name='dispatch')
 class TopicCreateProjectView(generic.CreateView):
-    model = Topic
-    form_class = ProjectForm
+    model = Project
+    # form_class = ProjectForm
     pk_url_kwarg = 'topic_id'
     template_name = 'projectinfo/create_project.html'
+    fields = ['title', 'text']
 
-    # def form_valid(self, form):
-    #     form.instance.topic_id = Topic.objects.get(id = self.kwargs.get('topic_id'))
-    #     return super(CreateProjectView, self).form_valid(form)
+    def form_valid(self, form):
+        form.instance.topic_id = Topic.objects.get(id = self.kwargs.get('topic_id'))
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
     
     def post(self, request, *args, **kwargs):
         # if not request.user.is_authenticated:
