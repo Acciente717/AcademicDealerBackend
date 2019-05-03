@@ -6,6 +6,9 @@
     <li>
         <a href="{% url 'project' topic_id=topic.id project_id=project.id %}">{{ project.title }}</a>
         <p>{{ project.text }}</p>
+        <p>{{ project.owner }}</p>
+        <p>{{ project.created_date }}</p>
+        <p>{{ project.modified_date }}</p>
     </li>
 {% endfor %}
 

@@ -6,3 +6,8 @@ class ProjectForm(ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'text']
+
+class ReplyForm(ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['text']
