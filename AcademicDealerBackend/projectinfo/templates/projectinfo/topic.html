@@ -1,3 +1,11 @@
+{% if user.is_authenticated %}
+  <h2>Hi {{ user.username }}!</h2>
+  <a href="{% url 'logout' %}">logout</a>
+{% else %}
+  <p>You are not logged in</p>
+  <a href="{% url 'login' %}">login</a>
+{% endif %}
+
 <h1>{{ topic.topic_text }}</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
