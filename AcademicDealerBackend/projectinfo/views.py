@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from datetime import datetime
 
 from .forms import ProjectForm, ReplyForm
 from .models import Topic, Project, Reply
@@ -35,8 +36,12 @@ class TopicCreateProjectView(generic.CreateView):
     pk_url_kwarg = 'topic_id'
 
     def form_valid(self, form):
-        form.instance.topic = Topic.objects.get(id = self.kwargs.get('topic_id'))
+        form.instance.topic = Topic.objects.get(id=self.kwargs.get('topic_id'))
         form.instance.owner = self.request.user
+        
+        topic = Topic.objects.get(id=self.kwargs.get('topic_id'))
+        topic.update_modify_time()
+
         return super().form_valid(form)
     
     def post(self, request, *args, **kwargs):
@@ -77,6 +82,10 @@ class ProjectCreateProjectView(generic.CreateView):
     def form_valid(self, form):
         form.instance.project = Project.objects.get(id = self.kwargs.get('project_id'))
         form.instance.owner = self.request.user
+
+        project = Project.objects.get(id=self.kwargs.get('project_id'))
+        project.update_modify_time()
+
         return super().form_valid(form)
     
     def post(self, request, *args, **kwargs):
