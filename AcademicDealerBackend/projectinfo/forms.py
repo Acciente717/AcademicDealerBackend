@@ -11,3 +11,6 @@ class ReplyForm(ModelForm):
     class Meta:
         model = Reply
         fields = ['text']
+
+class ProjectSearchForm(forms.Form):
+    search_key = forms.CharField(max_length=150)
