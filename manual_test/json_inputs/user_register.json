@@ -1,0 +1,29 @@
+{
+    "dir":"request",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"haha@163.com",
+            "password_hash":"23333333"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"register",
+            "data":
+                {
+                    "real_name":"Donald Trump",
+                    "nick_name":"Idiot",
+                    "pic_url":"",
+                    "school":"Paradize",
+                    "department":"White House",
+                    "title":"Other",
+                    "enrollment_date":"2000-01-01",
+                    "labs":{},
+                    "projects":{},
+                    "seminars":{},
+                    "comments":{},
+                    "profile":""
+                }
+        }
+}
