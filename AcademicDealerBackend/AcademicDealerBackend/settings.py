@@ -27,12 +27,23 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGIN_URL = '/accounts/login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'email@163.com'
+DEFAULT_FROM_EMAIL = 'email@163.com'
+EMAIL_HOST_PASSWORD = 'your_password'
+AUTH_USER_MODEL = 'accounts.MyUser'
 
 # Application definition
 
 INSTALLED_APPS = [
-    'records.apps.RecordsConfig',
-    'polls.apps.PollsConfig',
+    'accounts.apps.AccountsConfig',
+    'projectinfo.apps.ProjectinfoConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +67,7 @@ ROOT_URLCONF = 'AcademicDealerBackend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,9 +91,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'academic_dealer',
         'USER': 'root',
-        'PASSWORD': 'xiaosuan0214',
+        'PASSWORD': 'password',
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
+        # 'PORT': '3306',
     }
 }
 

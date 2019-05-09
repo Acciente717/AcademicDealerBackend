@@ -1,0 +1,31 @@
+{% if user.is_authenticated %}
+  <h2>Hi {{ user.username }}!</h2>
+  <a href="{% url 'logout' %}">logout</a>
+{% else %}
+  <p>You are not logged in</p>
+  <a href="{% url 'login' %}">login</a>
+{% endif %}
+
+<h1>{{ project.title }}</h1>
+
+<p> {{ project.text }} </p>
+<p> {{ project.owner }}</p>
+<p> {{ project.created_date }}</p>
+<p> {{ project.modified_date }}</p>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% for reply in project.reply_set.all %}
+    <li>
+        <p>{{ reply.text }}</p>
+        <p>{{ reply.owner }}</p>
+        <p>{{ reply.created_date }}</p>
+        <p>{{ reply.modified_date }}</p>
+    </li>
+{% endfor %}
+
+<h2>Reply in the Project {{ Project.text }}</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Submit Reply</button>
+</form>

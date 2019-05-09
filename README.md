@@ -1,23 +1,14 @@
 # AcademicDealerBackend
 
-## System Requirements
+## Dependencies
 
-Please use **the exact same platforms** to develop, otherwise you may fail to build correctly or even introduce compatibility errors.
-```
-Operating system: Linux
++ django
++ mysql
 
-Python version: 3.5
+## How to Run
 
-Django version: 2.2
-```
-For your reference, the initial code is written in
-```
-Linux, ubuntu 18.04 LTS
-
-python 3.5.6
-
-Django 2.2
-```
-## Test HTTP Request Handler
-
-Basic HTTP requests handler is implemented. Now you can send HTTP request to "127.0.0.1:8000/ResponseTest/" for an echo test.
++ add a superuser called `root` with password `password` in mysql
++ create a database called `academic_dealer` in `mysql`
++ python3 manage.py makemigrations
++ python3 manage.py migrate
++ python3 manage.py runserver
