@@ -44,6 +44,7 @@ AUTH_USER_MODEL = 'accounts.MyUser'
 INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'projectinfo.apps.ProjectinfoConfig',
+    'users.apps.UsersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware', TEMPORARILY DISABLED, NOT SAFE
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -91,7 +92,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'academic_dealer',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': 'pwd',
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         # 'PORT': '3306',
     }
