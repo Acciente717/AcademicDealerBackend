@@ -38,31 +38,35 @@ def register(request):
 
     # bad JSON format
     except json.JSONDecodeError:
-        return HttpResponse(gen_register_fail(None, REGISTER_CORRUPTED_JSON))
+        http_resp = HttpResponse(gen_register_fail(None, REGISTER_CORRUPTED_JSON))
 
     # duplicated email or nickname
     except IntegrityError:
-        return HttpResponse(gen_register_fail(decoded, REGISTER_DUPLICATE_MAIL_NICKNAME))
+        http_resp = HttpResponse(gen_register_fail(decoded, REGISTER_DUPLICATE_MAIL_NICKNAME))
 
     # wrong format of specific fields
     # for example, date must be in "yyyy-mm-dd"
     except ValidationError:
-        return HttpResponse(gen_register_fail(decoded, REGISTER_INVALID_FIELD))
+        http_resp = HttpResponse(gen_register_fail(decoded, REGISTER_INVALID_FIELD))
 
     # missing json fields
     except KeyError:
-        return HttpResponse(gen_register_fail(decoded, REGISTER_MISSING_FIELD))
+        http_resp = HttpResponse(gen_register_fail(decoded, REGISTER_MISSING_FIELD))
 
     # bad json type
     except BadJSONType:
-        return HttpResponse(gen_register_fail(decoded, REGISTER_BAD_TYPE))
+        http_resp = HttpResponse(gen_register_fail(decoded, REGISTER_BAD_TYPE))
 
     # other unknown exceptions
     except Exception:
-        return HttpResponse(gen_register_fail(decoded, REGISTER_OTHER_ERROR))
+        http_resp = HttpResponse(gen_register_fail(decoded, REGISTER_OTHER_ERROR))
 
     # success
-    return HttpResponse(gen_register_success(decoded))
+    else:
+        http_resp = HttpResponse(gen_register_success(decoded))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
 
 def login(request):
     try:
@@ -82,30 +86,34 @@ def login(request):
 
     # wrong password
     except BadPassword:
-        return HttpResponse(gen_login_fail(decoded, LOGIN_WRONG_PASSWORD))
+        http_resp = HttpResponse(gen_login_fail(decoded, LOGIN_WRONG_PASSWORD))
 
     # email not found
     except UserAccount.DoesNotExist:
-        return HttpResponse(gen_login_fail(decoded, LOGIN_EMAIL_NOT_FOUND))
+        http_resp = HttpResponse(gen_login_fail(decoded, LOGIN_EMAIL_NOT_FOUND))
 
     # bad JSON format
     except json.JSONDecodeError:
-        return HttpResponse(gen_login_fail(None, LOGIN_CORRUPTED_JSON))
+        http_resp = HttpResponse(gen_login_fail(None, LOGIN_CORRUPTED_JSON))
 
     # missing json fields
     except KeyError:
-        return HttpResponse(gen_login_fail(decoded, LOGIN_MISSING_FIELD))
+        http_resp = HttpResponse(gen_login_fail(decoded, LOGIN_MISSING_FIELD))
 
     # bad json type
     except BadJSONType:
-        return HttpResponse(gen_login_fail(decoded, LOGIN_BAD_TYPE))
+        http_resp = HttpResponse(gen_login_fail(decoded, LOGIN_BAD_TYPE))
 
     # other unknown exceptions
     except Exception:
-        return HttpResponse(gen_login_fail(decoded, LOGIN_OTHER_ERROR))
+        http_resp = HttpResponse(gen_login_fail(decoded, LOGIN_OTHER_ERROR))
 
     # success
-    return HttpResponse(gen_login_success(decoded))
+    else:
+        http_resp = HttpResponse(gen_login_success(decoded))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
 
 def view(request):
     try:
@@ -128,30 +136,34 @@ def view(request):
 
     # wrong password
     except BadPassword:
-        return HttpResponse(gen_view_fail(decoded, VIEW_WRONG_PASSWORD))
+        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_WRONG_PASSWORD))
 
     # email not found
     except UserAccount.DoesNotExist:
-        return HttpResponse(gen_view_fail(decoded, VIEW_EMAIL_NOT_FOUND))
+        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_EMAIL_NOT_FOUND))
 
     # bad JSON format
     except json.JSONDecodeError:
-        return HttpResponse(gen_view_fail(None, VIEW_CORRUPTED_JSON))
+        http_resp = HttpResponse(gen_view_fail(None, VIEW_CORRUPTED_JSON))
 
     # missing json fields
     except KeyError:
-        return HttpResponse(gen_view_fail(decoded, VIEW_MISSING_FIELD))
+        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_MISSING_FIELD))
 
     # bad json type
     except BadJSONType:
-        return HttpResponse(gen_view_fail(decoded, VIEW_BAD_TYPE))
+        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_BAD_TYPE))
 
     # other unknown exceptions
     except Exception:
-        return HttpResponse(gen_view_fail(decoded, VIEW_OTHER_ERROR))
+        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_OTHER_ERROR))
 
     # success
-    return HttpResponse(resp)
+    else:
+        http_resp = HttpResponse(resp)
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
 
 def edit(request):
     try:
@@ -183,39 +195,43 @@ def edit(request):
 
     # duplicated new nickname
     except IntegrityError:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_DUPLICATED_NICKNAME))
-    
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_DUPLICATED_NICKNAME))
+
     # wrong password
     except BadPassword:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_WRONG_PASSWORD))
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_WRONG_PASSWORD))
 
     # email not found
     except UserAccount.DoesNotExist:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_EMAIL_NOT_FOUND))
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_EMAIL_NOT_FOUND))
 
     # bad JSON format
     except json.JSONDecodeError:
-        return HttpResponse(gen_edit_fail(None, EDIT_CORRUPTED_JSON))
+        http_resp = HttpResponse(gen_edit_fail(None, EDIT_CORRUPTED_JSON))
 
     # wrong format of specific fields
     # for example, date must be in "yyyy-mm-dd"
     except ValidationError:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_INVALID_FIELD))
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_INVALID_FIELD))
 
     # missing json fields
     except KeyError:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_MISSING_FIELD))
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_MISSING_FIELD))
 
     # bad json type
     except BadJSONType:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_BAD_TYPE))
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_BAD_TYPE))
 
     # other unknown exceptions
     except Exception:
-        return HttpResponse(gen_edit_fail(decoded, EDIT_OTHER_ERROR))
+        http_resp = HttpResponse(gen_edit_fail(decoded, EDIT_OTHER_ERROR))
 
     # success
-    return HttpResponse(gen_edit_success(decoded))
+    else:
+        http_resp = HttpResponse(gen_edit_success(decoded))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
 
 def delete(request):
     try:
@@ -238,27 +254,31 @@ def delete(request):
 
     # wrong password
     except BadPassword:
-        return HttpResponse(gen_delete_fail(decoded, DELETE_WRONG_PASSWORD))
+        http_resp = HttpResponse(gen_delete_fail(decoded, DELETE_WRONG_PASSWORD))
 
     # email not found
     except UserAccount.DoesNotExist:
-        return HttpResponse(gen_delete_fail(decoded, DELETE_EMAIL_NOT_FOUND))
+        http_resp = HttpResponse(gen_delete_fail(decoded, DELETE_EMAIL_NOT_FOUND))
 
     # bad JSON format
     except json.JSONDecodeError:
-        return HttpResponse(gen_delete_fail(None, DELETE_CORRUPTED_JSON))
+        http_resp = HttpResponse(gen_delete_fail(None, DELETE_CORRUPTED_JSON))
 
     # missing json fields
     except KeyError:
-        return HttpResponse(gen_delete_fail(decoded, DELETE_MISSING_FIELD))
+        http_resp = HttpResponse(gen_delete_fail(decoded, DELETE_MISSING_FIELD))
 
     # bad json type
     except BadJSONType:
-        return HttpResponse(gen_delete_fail(decoded, DELETE_BAD_TYPE))
+        http_resp = HttpResponse(gen_delete_fail(decoded, DELETE_BAD_TYPE))
 
     # other unknown exceptions
     except Exception:
-        return HttpResponse(gen_delete_fail(decoded, DELETE_OTHER_ERROR))
+        http_resp = HttpResponse(gen_delete_fail(decoded, DELETE_OTHER_ERROR))
 
     # success
-    return HttpResponse(gen_delete_success(decoded))
+    else:
+        http_resp = HttpResponse(gen_delete_success(decoded))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
