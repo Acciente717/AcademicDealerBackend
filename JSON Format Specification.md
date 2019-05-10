@@ -88,7 +88,12 @@ edit = { bio }
 
 delete = { }
 
-view = { } -- request to view a given account's view
+view = {
+	lab = Boolean,
+	project = Boolean,
+  seminar = Boolean,
+  comment = Boolean
+} -- request to view a given account's view
 ```
 
 #### Response
@@ -154,8 +159,12 @@ delete = {
 
 view = {
   status = Number ( 0 -- success
-                  | 1 -- no such user
-                  | 2 -- other failure
+                  | 1 -- email or nickname already registered
+                  | 2 -- invalid field (like date must be in "yyyy-mm-dd")
+                  | 3 -- corrupted JSON
+                  | 4 -- missing JSON field
+                  | 5 -- bad req/resp or content_type etc. in JSON
+                  | 6 -- other failure
                   ),
   bio
 }
