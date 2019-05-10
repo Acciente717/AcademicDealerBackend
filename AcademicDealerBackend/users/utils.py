@@ -64,6 +64,21 @@ EDIT_CORRUPTED_JSON = 5
 EDIT_BAD_TYPE = 6
 EDIT_OTHER_ERROR = 7
 
+# delete status code
+# 0 -- success
+# 1 -- wrong password
+# 2 -- account not found
+# 3 -- missing JSON field
+# 4 -- corrupted JSON
+# 5 -- bad req/resp or content_type etc. in JSON
+# 6 -- other failure
+DELETE_SUCCESS = 0
+DELETE_WRONG_PASSWORD = 1
+DELETE_EMAIL_NOT_FOUND = 2
+DELETE_MISSING_FIELD = 3
+DELETE_CORRUPTED_JSON = 4
+DELETE_BAD_TYPE = 5
+DELETE_OTHER_ERROR = 6
 
 class BadPassword(RuntimeError):
     pass
@@ -360,7 +375,74 @@ def gen_edit_fail(dic, errno):
     "content_type":"account",
     "content":
         {
-            "action":"login",
+            "action":"edit",
+            "data":
+                {
+                    "status":%s
+                }
+        }
+}
+''' % (errno)
+    return resp
+
+def gen_delete_success(dic):
+    resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"%s",
+            "password_hash":"%s"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"delete",
+            "data":
+                {
+                    "status":%s
+                }
+        }
+}
+''' % (dic['signature']['user_email'], dic['signature']['password_hash'], DELETE_SUCCESS)
+    return resp
+
+def gen_delete_fail(dic, errno):
+    if errno != DELETE_CORRUPTED_JSON and errno != DELETE_MISSING_FIELD\
+        and errno != DELETE_BAD_TYPE and DELETE_OTHER_ERROR:
+        resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"%s",
+            "password_hash":"%s"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"delete",
+            "data":
+                {
+                    "status":%s
+                }
+        }
+}
+''' % (dic['signature']['user_email'], dic['signature']['password_hash'], errno)
+    else:
+        resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":false
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"delete",
             "data":
                 {
                     "status":%s

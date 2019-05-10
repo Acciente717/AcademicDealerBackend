@@ -159,7 +159,12 @@ edit = {
 
 delete = {
   status = Number ( 0 -- success
-                  | 1 -- failure
+                  | 1 -- wrong password
+                  | 2 -- account not found
+                  | 3 -- missing JSON field
+                  | 4 -- corrupted JSON
+                  | 5 -- bad req/resp or content_type etc. in JSON
+                  | 6 -- other failure
                   )
 }
 
