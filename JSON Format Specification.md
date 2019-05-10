@@ -147,13 +147,24 @@ reset_password = {
 
 edit = {
   status = Number ( 0 -- success
-                  | 1 -- failure
+									| 1 -- wrong password
+									| 2 -- account not found
+                  | 3 -- duplicated nickname
+                  | 4 -- missing JSON field
+                  | 5 -- corrupted JSON
+                  | 6 -- bad req/resp or content_type etc. in JSON
+                  | 7 -- other failure
                   )
 }
 
 delete = {
   status = Number ( 0 -- success
-                  | 1 -- failure
+                  | 1 -- wrong password
+                  | 2 -- account not found
+                  | 3 -- missing JSON field
+                  | 4 -- corrupted JSON
+                  | 5 -- bad req/resp or content_type etc. in JSON
+                  | 6 -- other failure
                   )
 }
 
@@ -185,7 +196,7 @@ bio = {
   department = String,
   title = String,
   enrollment_date = String, -- date format
-  -- when registering, the following four fields need to be empty
+  -- when registering and editting, the following four fields need to be empty
   labs = [ lab_id = Number ], -- if the lab is on site
   projects = [ project_id = Number ],
   seminars = [ seminar_id = Number ],
