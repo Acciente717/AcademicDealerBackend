@@ -101,16 +101,21 @@ login = {
   status = Number ( 0 -- success
                   | 1 -- wrong password
                   | 2 -- account not found
-                  | 3 -- other failure
+                  | 3 -- missing JSON field
+                  | 4 -- corrupted JSON
+                  | 5 -- bad req/resp or content_type etc. in JSON
+                  | 6 -- other failure
                   )
 }
 
 register = {
   status = Number ( 0 -- success
                   | 1 -- email or nickname already registered
-                  | 2 -- invalid field
-                  | 3 -- invalid json
-                  | 4 -- other failure
+                  | 2 -- invalid field (like date must be in "yyyy-mm-dd")
+                  | 3 -- corrupted JSON
+                  | 4 -- missing JSON field
+                  | 5 -- bad req/resp or content_type etc. in JSON
+                  | 6 -- other failure
                   )
 }
 

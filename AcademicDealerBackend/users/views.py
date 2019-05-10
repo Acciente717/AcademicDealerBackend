@@ -14,10 +14,10 @@ def register(request):
         body = str(request.body, encoding='utf8')
         decoded = json.loads(body)
 
-        # sanity check
+        # check the type of JSON query
         assert_dir(decoded, 'request')
         assert_content_type(decoded, 'account')
-        assert_account_action(decoded, "register")
+        assert_account_action(decoded, 'register')
 
         # create new user
         json_signature = decoded['signature']
@@ -38,7 +38,7 @@ def register(request):
     
     # bad JSON format
     except json.JSONDecodeError:
-        return HttpResponse(gen_register_fail(None, REGISTER_INVALID_JSON))
+        return HttpResponse(gen_register_fail(None, REGISTER_CORRUPTED_JSON))
     
     # duplicated email or nickname
     except IntegrityError:
@@ -49,6 +49,14 @@ def register(request):
     except ValidationError:
         return HttpResponse(gen_register_fail(decoded, REGISTER_INVALID_FIELD))
     
+    # missing json fields
+    except KeyError:
+        return HttpResponse(gen_register_fail(decoded, REGISTER_MISSING_FIELD))
+    
+    # bad json type
+    except BadJSONType:
+        return HttpResponse(gen_register_fail(decoded, REGISTER_BAD_TYPE))
+    
     # other unknown exceptions
     except Exception:
         return HttpResponse(gen_register_fail(decoded, REGISTER_OTHER_ERROR))
@@ -56,3 +64,45 @@ def register(request):
     # success
     return HttpResponse(gen_register_success(decoded))
     
+def login(request):
+    try:
+        # decode http content to JSON
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        # check the type of JSON query
+        assert_dir(decoded, 'request')
+        assert_content_type(decoded, 'account')
+        assert_account_action(decoded, 'login')
+
+        # search database and compare password
+        user = UserAccount.objects.get(email=decoded['signature']['user_email'])
+        if user.pw_hash != decoded['signature']['password_hash']:
+            raise BadPassword
+
+    # wrong password
+    except BadPassword:
+        return HttpResponse(gen_login_fail(decoded, LOGIN_WRONG_PASSWORD))
+    
+    # email not found
+    except UserAccount.DoesNotExist:
+        return HttpResponse(gen_login_fail(decoded, LOGIN_EMAIL_NOT_FOUND))
+    
+    # bad JSON format
+    except json.JSONDecodeError:
+        return HttpResponse(gen_login_fail(None, LOGIN_CORRUPTED_JSON))
+    
+    # missing json fields
+    except KeyError:
+        return HttpResponse(gen_login_fail(decoded, LOGIN_MISSING_FIELD))
+    
+    # bad json type
+    except BadJSONType:
+        return HttpResponse(gen_login_fail(decoded, LOGIN_BAD_TYPE))
+
+    # other unknown exceptions
+    except Exception:
+        return HttpResponse(gen_login_fail(decoded, LOGIN_OTHER_ERROR))
+    
+    # success
+    return HttpResponse(gen_login_success(decoded))
