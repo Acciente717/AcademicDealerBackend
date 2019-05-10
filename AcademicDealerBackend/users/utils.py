@@ -30,6 +30,23 @@ LOGIN_CORRUPTED_JSON = 4
 LOGIN_BAD_TYPE = 5
 LOGIN_OTHER_ERROR = 6
 
+# view status code
+# 0 -- success
+# 1 -- wrong password
+# 2 -- account not found
+# 3 -- missing JSON field
+# 4 -- corrupted JSON
+# 5 -- bad req/resp or content_type etc. in JSON
+# 6 -- other failure
+VIEW_SUCCESS = 0
+VIEW_WRONG_PASSWORD = 1
+VIEW_EMAIL_NOT_FOUND = 2
+VIEW_MISSING_FIELD = 3
+VIEW_CORRUPTED_JSON = 4
+VIEW_BAD_TYPE = 5
+VIEW_OTHER_ERROR = 6
+
+
 class BadPassword(RuntimeError):
     pass
 
@@ -177,6 +194,91 @@ def gen_login_fail(dic, errno):
             "data":
                 {
                     "status":%s
+                }
+        }
+}
+''' % (errno)
+    return resp
+
+def build_user_bio_json(user):
+    resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"%s",
+            "password_hash":"%s"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"view",
+            "data":
+                {
+                    "status":%s,
+                    "bio":
+                        {
+                            "real_name":"%s",
+                            "nick_name":"%s",
+                            "pic_url":"%s",
+                            "school":"%s",
+                            "department":"%s",
+                            "title":"%s",
+                            "enrollment_date":"%s",
+                            "labs":{},
+                            "projects":{},
+                            "seminars":{},
+                            "comments":{},
+                            "profile":"%s"
+                        }
+                }
+        }
+}''' % (user.email, user.pw_hash, VIEW_SUCCESS, user.real_name,
+        user.nick_name, user.pic_url, user.school, user.department,
+        user.title, user.enrollment_date, user.profile)
+    return resp
+
+def gen_view_fail(dic, errno):
+    if errno != VIEW_CORRUPTED_JSON and errno != VIEW_MISSING_FIELD\
+        and errno != VIEW_BAD_TYPE and VIEW_OTHER_ERROR:
+        resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"%s",
+            "password_hash":"%s"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"view",
+            "data":
+                {
+                    "status":%s,
+                    "bio":{}
+                }
+        }
+}
+''' % (dic['signature']['user_email'], dic['signature']['password_hash'], errno)
+    else:
+        resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":false
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"view",
+            "data":
+                {
+                    "status":%s,
+                    "bio"{}
                 }
         }
 }

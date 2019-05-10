@@ -23,7 +23,7 @@
                     "projects":{},
                     "seminars":{},
                     "comments":{},
-                    "profile":""
+                    "profile":"#### Profile title\nProfile content\n"
                 }
         }
 }
