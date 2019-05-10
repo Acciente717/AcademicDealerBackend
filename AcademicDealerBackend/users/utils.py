@@ -46,6 +46,24 @@ VIEW_CORRUPTED_JSON = 4
 VIEW_BAD_TYPE = 5
 VIEW_OTHER_ERROR = 6
 
+# edit status code
+# 0 -- success
+# 1 -- wrong password
+# 2 -- account not found
+# 3 -- duplicated nickname
+# 4 -- missing JSON field
+# 5 -- corrupted JSON
+# 6 -- bad req/resp or content_type etc. in JSON
+# 7 -- other failure
+EDIT_SUCCESS = 0
+EDIT_WRONG_PASSWORD = 1
+EDIT_EMAIL_NOT_FOUND = 2
+EDIT_DUPLICATED_NICKNAME = 3
+EDIT_MISSING_FIELD = 4
+EDIT_CORRUPTED_JSON = 5
+EDIT_BAD_TYPE = 6
+EDIT_OTHER_ERROR = 7
+
 
 class BadPassword(RuntimeError):
     pass
@@ -279,6 +297,73 @@ def gen_view_fail(dic, errno):
                 {
                     "status":%s,
                     "bio"{}
+                }
+        }
+}
+''' % (errno)
+    return resp
+
+def gen_edit_success(dic):
+    resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"%s",
+            "password_hash":"%s"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"edit",
+            "data":
+                {
+                    "status":%s
+                }
+        }
+}
+''' % (dic['signature']['user_email'], dic['signature']['password_hash'], EDIT_SUCCESS)
+    return resp
+
+def gen_edit_fail(dic, errno):
+    if errno != EDIT_CORRUPTED_JSON and errno != EDIT_MISSING_FIELD\
+        and errno != EDIT_BAD_TYPE and EDIT_OTHER_ERROR:
+        resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"%s",
+            "password_hash":"%s"
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"edit",
+            "data":
+                {
+                    "status":%s
+                }
+        }
+}
+''' % (dic['signature']['user_email'], dic['signature']['password_hash'], errno)
+    else:
+        resp = '''\
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":false
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"login",
+            "data":
+                {
+                    "status":%s
                 }
         }
 }
