@@ -78,6 +78,10 @@ def edit(request):
             raise LoginFail
 
         json_content_data = decoded['content']['data']
+        
+        if "id" not in json_content_data:
+            raise NO_PROJECT_ID
+        
         project = ProjectInfo.objects.get(id=json_content_data['id'])
 
         if project.owner != user:
@@ -100,6 +104,9 @@ def edit(request):
     
     except PERMISSION_DENY:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    
+    except NO_PROJECT_ID:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_NO_PROJECT_ID))
 
     # other unknown exceptions
     except Exception as e:
@@ -108,7 +115,7 @@ def edit(request):
 
     else:
     # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
+        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp

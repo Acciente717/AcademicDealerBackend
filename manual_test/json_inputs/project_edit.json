@@ -9,14 +9,15 @@
     "content_type":"project",
     "content":
         {
-            "action":"create",
+            "action":"edit",
             "data":
                 {
+                    "id":4,
                     "name":"project 16666",
                     "start_date":"2022-01-01",
                     "end_date":"2035-01-01",
                     "member_total_need":"100",
-                    "description":"This is a stupid project. (Updated Version)"
+                    "description":"This is a stupid project. (Updated Version 2)"
                 }
         }
 }
