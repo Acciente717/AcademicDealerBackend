@@ -338,7 +338,12 @@ drop = { }
 when data.dir == "response"
 prefix data.content.project.data
 
-create = { status }
+create = { 
+  status = Number ( 0 -- success
+                  | 1 -- no such project
+                  | 2 -- other failure
+                  ),
+}
 
 edit = { status }
 
