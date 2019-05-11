@@ -50,7 +50,7 @@ def gen_fail_response(action, status):
         "action":"%s",
         "data":
         {
-            "status":%s
+            "status":%d
         }
     }
 }
@@ -67,10 +67,35 @@ def gen_success_response(action, status, id):
         "action":"%s",
         "data":
         {
-            "status":%s
+            "status":%d
             "id":%d
         }
     }
 }
 ''' % (action, status, id)
     return response_msg
+
+def build_project_view(action, status, id, project, members):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":"%s",
+            "id":%d,
+            "name":"%s",
+            "owner":%d,
+            "start_date":"%s",
+            "end_date":"%s",
+            "member_total_need":"%s",
+            "description":"%s",
+            "current_members":"%s"
+        }
+    }
+}''' % (action, status, id, project.name, project.owner.id, project.start_date, project.end_date, project.member_total_need, project.description, members)
+ 
+    return resp

@@ -143,7 +143,6 @@ def delete(request):
             raise PROJECT_ID_ERROR
         
         project_id = json_content_data['id']
-        print(project_id)
         project = ProjectInfo.objects.get(id=project_id)
         project.delete()
 
@@ -168,6 +167,59 @@ def delete(request):
     else:
     # success
         http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def view(request):
+    action = 'view'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'view')
+
+        json_signature = decoded['signature']
+        if json_signature['is_user'] != True:
+            raise LoginFail
+        user = UserAccount.objects.get(email=json_signature['user_email'])
+        if user.pw_hash != json_signature['password_hash']:
+            raise LoginFail
+
+        json_content_data = decoded['content']['data']
+        
+        if "id" not in json_content_data:
+            raise PROJECT_ID_ERROR
+        
+        project_id = json_content_data['id']
+        project = ProjectInfo.objects.get(id=project_id)
+
+        members = str([i.person.id for i in ProjectMember.objects.filter(project=project)])
+
+        response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members)
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except LoginFail:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    
+    except PERMISSION_DENY:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    
+    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(response_msg)
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
