@@ -14,7 +14,7 @@ STATUS_LOGIN_FAIL = 4
 STATUS_ALREADY_FULL = 5
 STATUS_OTHER_FAILURE = 6
 STATUS_CORRUPTED_JSON = 7
-STATUS_NO_PROJECT_ID = 8
+STATUS_PROJECT_ID_ERROR = 8
 
 class LoginFail(RuntimeError):
     pass
@@ -25,7 +25,7 @@ class BadJSONType(RuntimeError):
 class PERMISSION_DENY(RuntimeError):
     pass
 
-class NO_PROJECT_ID(RuntimeError):
+class PROJECT_ID_ERROR(RuntimeError):
     pass
 
 def assert_dir(dic, val):

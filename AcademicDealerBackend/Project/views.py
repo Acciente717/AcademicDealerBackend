@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
 from .models import ProjectInfo, ProjectMember, UserAccount
 import json
 from .utils import *
@@ -80,7 +81,7 @@ def edit(request):
         json_content_data = decoded['content']['data']
         
         if "id" not in json_content_data:
-            raise NO_PROJECT_ID
+            raise PROJECT_ID_ERROR
         
         project = ProjectInfo.objects.get(id=json_content_data['id'])
 
@@ -105,8 +106,8 @@ def edit(request):
     except PERMISSION_DENY:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
     
-    except NO_PROJECT_ID:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_NO_PROJECT_ID))
+    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
     except Exception as e:
@@ -116,6 +117,57 @@ def edit(request):
     else:
     # success
         http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def delete(request):
+    action = 'delete'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'delete')
+
+        json_signature = decoded['signature']
+        if json_signature['is_user'] != True:
+            raise LoginFail
+        user = UserAccount.objects.get(email=json_signature['user_email'])
+        if user.pw_hash != json_signature['password_hash']:
+            raise LoginFail
+
+        json_content_data = decoded['content']['data']
+        
+        if "id" not in json_content_data:
+            raise PROJECT_ID_ERROR
+        
+        project_id = json_content_data['id']
+        print(project_id)
+        project = ProjectInfo.objects.get(id=project_id)
+        project.delete()
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except LoginFail:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    
+    except PERMISSION_DENY:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    
+    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
