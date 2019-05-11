@@ -42,18 +42,73 @@ def create(request):
         )
         project_member.save()
 
-
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
-        return HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
     except LoginFail:
-        return HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
     # other unknown exceptions
     except Exception as e:
         print(e)
-        return HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
 
+    else:
     # success
-    return HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
+        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def edit(request):
+    action = 'edit'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'edit')
+
+        json_signature = decoded['signature']
+        if json_signature['is_user'] != True:
+            raise LoginFail
+        user = UserAccount.objects.get(email=json_signature['user_email'])
+        if user.pw_hash != json_signature['password_hash']:
+            raise LoginFail
+
+        json_content_data = decoded['content']['data']
+        project = ProjectInfo.objects.get(id=json_content_data['id'])
+
+        if project.owner != user:
+            raise PERMISSION_DENY
+
+        project.name = json_content_data['name']
+        project.start_date = json_content_data['start_date']
+        project.end_date = json_content_data['end_date']
+        project.member_total_need = json_content_data['member_total_need']
+        project.description = json_content_data['description']
+
+        project.save()
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except LoginFail:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    
+    except PERMISSION_DENY:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp

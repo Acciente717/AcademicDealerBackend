@@ -1,0 +1,22 @@
+{
+    "dir":"request",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"haha@163.com",
+            "password_hash":"23333333"
+        },
+    "content_type":"project",
+    "content":
+        {
+            "action":"create",
+            "data":
+                {
+                    "name":"project 16666",
+                    "start_date":"2022-01-01",
+                    "end_date":"2035-01-01",
+                    "member_total_need":"100",
+                    "description":"This is a stupid project. (Updated Version)"
+                }
+        }
+}
