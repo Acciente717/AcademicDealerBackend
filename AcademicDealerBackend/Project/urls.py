@@ -7,7 +7,7 @@ urlpatterns = [
     path('create/', views.create, name='create'),
     path('edit/', views.edit, name='edit'),
     path('delete/', views.delete, name='delete'),
-    path('view/', views.view, name='view')
-    # path('join/', views.join, name='join')
+    path('view/', views.view, name='view'),
+    path('join/', views.join, name='join')
     # path('drop/', views.drop, name='drop')
 ]

@@ -3,8 +3,8 @@
     "signature":
         {
             "is_user":true,
-            "user_email":"haha@163.com",
-            "password_hash":"23333333"
+            "user_email":"numb@dd.com",
+            "password_hash":"3333"
         },
     "content_type":"account",
     "content":
@@ -13,7 +13,7 @@
             "data":
                 {
                     "real_name":"Donald Trump",
-                    "nick_name":"Idiot",
+                    "nick_name":"tomato",
                     "pic_url":"",
                     "school":"Paradize",
                     "department":"White House",

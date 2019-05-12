@@ -15,6 +15,8 @@ STATUS_ALREADY_FULL = 5
 STATUS_OTHER_FAILURE = 6
 STATUS_CORRUPTED_JSON = 7
 STATUS_PROJECT_ID_ERROR = 8
+STATUS_ALREADY_IN = 9
+STATUS_NOT_IN = 10
 
 class LoginFail(RuntimeError):
     pass
@@ -26,6 +28,15 @@ class PERMISSION_DENY(RuntimeError):
     pass
 
 class PROJECT_ID_ERROR(RuntimeError):
+    pass
+
+class OUTDATE(RuntimeError):
+    pass
+
+class ALREADY_IN(RuntimeError):
+    pass
+
+class ALREADY_FULL(RuntimeError):
     pass
 
 def assert_dir(dic, val):
