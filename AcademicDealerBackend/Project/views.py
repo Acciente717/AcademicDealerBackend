@@ -34,7 +34,7 @@ def create(request):
             start_date = json_content_data['start_date'],
             end_date = json_content_data['end_date'],
             member_total_need = json_content_data['member_total_need'],
-            description = json_content_data['description'],
+            description = json_content_data['description'].replace('\n', '\\n')
         )
         new_project.save()
 
@@ -93,7 +93,7 @@ def edit(request):
         project.start_date = json_content_data['start_date']
         project.end_date = json_content_data['end_date']
         project.member_total_need = json_content_data['member_total_need']
-        project.description = json_content_data['description']
+        project.description = json_content_data['description'].replace('\n', '\\n')
 
         project.save()
 
