@@ -239,7 +239,7 @@ view = { }
 when data.dir == "response"
 prefix data.content.lab.data
 
-create = { status }
+create = { status, id = Number }
 
 edit = { status }
 
@@ -338,7 +338,7 @@ drop = { }
 when data.dir == "response"
 prefix data.content.project.data
 
-create = { status }
+create = { status, id = Number }
 
 edit = { status }
 
@@ -428,7 +428,7 @@ drop = { }
 when data.dir == "response"
 prefix data.content.seminar.data
 
-create = { status }
+create = { status, id = Number }
 
 edit = { status }
 
