@@ -184,7 +184,7 @@ def edit(request):
         user.department = json_content_data['department']
         user.title = json_content_data['title']
         user.enrollment_date = json_content_data['enrollment_date']
-        user.profile = json_content_data['profile']
+        user.profile = json_content_data['profile'].replace('\n', '\\n')
         user.save()
 
     # duplicated new nickname
