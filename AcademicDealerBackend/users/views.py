@@ -32,7 +32,7 @@ def register(request):
             department = json_content_data['department'],
             title = json_content_data['title'],
             enrollment_date = json_content_data['enrollment_date'],
-            profile = json_content_data['profile']
+            profile = json_content_data['profile'].replace('\n', '\\n')
         )
         new_user.save()
 
@@ -126,17 +126,11 @@ def view(request):
         assert_content_type(decoded, 'account')
         assert_account_action(decoded, 'view')
 
-        # search database and compare password
+        # search database
         user = UserAccount.objects.get(email=decoded['signature']['user_email'])
-        if user.pw_hash != decoded['signature']['password_hash']:
-            raise BadPassword
 
         # build response JSON
         resp = build_user_bio_json(user)
-
-    # wrong password
-    except BadPassword:
-        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_WRONG_PASSWORD))
 
     # email not found
     except UserAccount.DoesNotExist:
