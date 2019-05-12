@@ -126,17 +126,11 @@ def view(request):
         assert_content_type(decoded, 'account')
         assert_account_action(decoded, 'view')
 
-        # search database and compare password
+        # search database
         user = UserAccount.objects.get(email=decoded['signature']['user_email'])
-        if user.pw_hash != decoded['signature']['password_hash']:
-            raise BadPassword
 
         # build response JSON
         resp = build_user_bio_json(user)
-
-    # wrong password
-    except BadPassword:
-        http_resp = HttpResponse(gen_view_fail(decoded, VIEW_WRONG_PASSWORD))
 
     # email not found
     except UserAccount.DoesNotExist:
