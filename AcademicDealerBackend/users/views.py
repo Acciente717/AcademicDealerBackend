@@ -32,7 +32,7 @@ def register(request):
             department = json_content_data['department'],
             title = json_content_data['title'],
             enrollment_date = json_content_data['enrollment_date'],
-            profile = json_content_data['profile']
+            profile = json_content_data['profile'].replace('\n', '\\n')
         )
         new_user.save()
 
