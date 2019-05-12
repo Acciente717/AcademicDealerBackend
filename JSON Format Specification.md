@@ -239,7 +239,7 @@ view = { }
 when data.dir == "response"
 prefix data.content.lab.data
 
-create = { status }
+create = { status, id = Number }
 
 edit = { status }
 
@@ -338,35 +338,30 @@ drop = { }
 when data.dir == "response"
 prefix data.content.project.data
 
-create = { status }
+create = { status, id = Number }
 
 edit = { status }
 
 delete = { status }
 
-view = {
-  status = Number ( 0 -- success
-                  | 1 -- no such project
-                  | 2 -- other failure
-                  ),
-  project_info
-}
+view = { status }
 
-join = {
-  status = Number ( 0 -- success
-                  | 1 -- invalid account
-                  | 2 -- already outdated
-                  | 3 -- already full
-                  | 4 -- other failure
-                  )
-}
+join = { status }
 
 drop = { status }
 
-status = Number ( 0 -- success
-                | 1 -- invalid account
-                | 2 -- permission denied
-                | 3 -- other failure
+status = Number (
+                  0 -- success
+                  1 -- no project
+                  2 -- project outdated
+                  3 -- permission deny
+                  4 -- user login fail
+                  5 -- project quota is full 
+                  6 -- user not in the project
+                  7 -- json corrupt
+                  8 -- project id error
+                  9 -- user already in the project
+                  10 -- other failure
                 )
 ```
 
@@ -428,7 +423,7 @@ drop = { }
 when data.dir == "response"
 prefix data.content.seminar.data
 
-create = { status }
+create = { status, id = Number }
 
 edit = { status }
 

@@ -1,0 +1,18 @@
+{
+    "dir":"request",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"numb@dd.com",
+            "password_hash":"3333"
+        },
+    "content_type":"project",
+    "content":
+        {
+            "action":"drop",
+            "data":
+                {
+                    "id":1
+                }
+        }
+}
