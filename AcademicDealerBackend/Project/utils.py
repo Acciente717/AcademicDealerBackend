@@ -106,7 +106,7 @@ def build_project_view(action, status, id, project, members):
             "status":"%s",
             "id":%d,
             "name":"%s",
-            "owner":%d,
+            "owner":"%s,
             "start_date":"%s",
             "end_date":"%s",
             "member_total_need":"%s",
@@ -114,6 +114,6 @@ def build_project_view(action, status, id, project, members):
             "current_members":"%s"
         }
     }
-}''' % (action, status, id, project.name, project.owner.id, project.start_date, project.end_date, project.member_total_need, project.description, members)
+}''' % (action, status, id, project.name, project.owner.email, project.start_date, project.end_date, project.member_total_need, project.description, members)
  
     return resp
