@@ -8,6 +8,6 @@ urlpatterns = [
     path('edit/', views.edit, name='edit'),
     path('delete/', views.delete, name='delete'),
     path('view/', views.view, name='view'),
-    path('join/', views.join, name='join')
-    # path('drop/', views.drop, name='drop')
+    path('join/', views.join, name='join'),
+    path('drop/', views.drop, name='drop')
 ]
