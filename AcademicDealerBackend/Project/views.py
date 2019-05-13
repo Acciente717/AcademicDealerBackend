@@ -370,3 +370,41 @@ def drop(request):
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
+
+def search(request):
+    action = 'search'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, action)
+
+        json_content_data = decoded['content']['data']
+
+        query_sets = []
+        for keyword in json_content_data['keywords']:
+            query_sets.append(ProjectInfo.objects.filter(name__contains=keyword))
+        query_sets = [set(i) for i in query_sets]
+        intersected_query_result = set.intersection(*query_sets)
+        
+        response_ids = [i.id for i in intersected_query_result]
+
+        resp = build_search_result(action, STATUS_SUCCESS, response_ids,
+                                   json_content_data['offset'],
+                                   json_content_data['length'])
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+        http_resp = HttpResponse(resp)
+    
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp

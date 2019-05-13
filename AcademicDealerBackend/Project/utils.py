@@ -114,6 +114,25 @@ def build_project_view(action, status, id, project, members):
             "current_members":"%s"
         }
     }
-}''' % (action, status, id, project.name, project.owner.id, project.start_date, project.end_date, project.member_total_need, project.description, members)
- 
+}''' % (action, status, id, project.name, project.owner.id,
+        project.start_date, project.end_date, project.member_total_need,
+        project.description, members)
+    return resp
+
+def build_search_result(action, status, ids, start, end):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":"%s",
+            "ids":"%s",
+            "total_num":%s
+        }
+    }
+}''' % (action, status, repr(ids[start:end]), len(ids))
     return resp
