@@ -181,13 +181,6 @@ def view(request):
 
         check_request(decoded, 'view')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
-
         json_content_data = decoded['content']['data']
         
         if "id" not in json_content_data:
@@ -196,7 +189,7 @@ def view(request):
         project_id = json_content_data['id']
         project = ProjectInfo.objects.get(id=project_id)
 
-        members = str([i.person.id for i in ProjectMember.objects.filter(project=project)])
+        members = str([i.person.email for i in ProjectMember.objects.filter(project=project)])
 
         response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members)
 
