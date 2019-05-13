@@ -189,7 +189,8 @@ def view(request):
         project_id = json_content_data['id']
         project = ProjectInfo.objects.get(id=project_id)
 
-        members = str([i.person.email for i in ProjectMember.objects.filter(project=project)])
+        members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
+        members = members.replace("'", '"')
 
         response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members)
 
