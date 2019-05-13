@@ -111,7 +111,7 @@ def build_project_view(action, status, id, project, members):
             "end_date":"%s",
             "member_total_need":%d,
             "description":"%s",
-            "current_members":"%s"
+            "current_members":%s
         }
     }
 }''' % (action, status, id, project.name, project.owner.id,
@@ -129,8 +129,8 @@ def build_search_result(action, status, ids, start, end):
         "action":"%s",
         "data":
         {
-            "status":"%s",
-            "ids":"%s",
+            "status":%s,
+            "ids":%s,
             "total_num":%s
         }
     }
