@@ -309,7 +309,7 @@ prefix data.content
 project = {
   id = Number,  -- when creating, id == -1
   action = Encode data,
-  data = Object ( create | edit | delete | view | join | drop )
+  data = Object ( create | edit | delete | view | join | drop | search )
 }
 ```
 
@@ -330,6 +330,12 @@ view = { }
 join = { }
 
 drop = { }
+
+search = {
+	keywords = [ keyword = String ], -- keywords are used to intersect query results
+	offset = Number, -- indicate the start number offset of query
+	length = Number  -- inidcate the number of query results displayed
+}
 ```
 
 #### Response
@@ -349,6 +355,12 @@ view = { status }
 join = { status }
 
 drop = { status }
+
+search = {
+	status = Number,
+	ids = [ id = Number ], -- len(ids) == length (of query JSON)
+	total_num = Number -- Total number of results, help frontend to determin offset and length
+}
 
 status = Number (
                   0 -- success
