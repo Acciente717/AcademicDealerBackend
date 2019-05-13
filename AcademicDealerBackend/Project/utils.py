@@ -106,7 +106,7 @@ def build_project_view(action, status, id, project, members):
             "status":%d,
             "id":%d,
             "name":"%s",
-            "owner":"%s,
+            "owner":"%s",
             "start_date":"%s",
             "end_date":"%s",
             "member_total_need":%d,

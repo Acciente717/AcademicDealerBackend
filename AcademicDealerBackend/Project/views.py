@@ -181,13 +181,6 @@ def view(request):
 
         check_request(decoded, 'view')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
-
         json_content_data = decoded['content']['data']
         
         if "id" not in json_content_data:
