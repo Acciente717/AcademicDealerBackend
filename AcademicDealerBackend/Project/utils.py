@@ -114,7 +114,7 @@ def build_project_view(action, status, id, project, members):
             "current_members":%s
         }
     }
-}''' % (action, status, id, project.name, project.owner.id,
+}''' % (action, status, id, project.name, project.owner.email,
         project.start_date, project.end_date, project.member_total_need,
         project.description, members)
     return resp
