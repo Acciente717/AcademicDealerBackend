@@ -12,7 +12,7 @@
             "action":"comment_delete",
             "data":
                 {
-                    "id":3
+                    "comment_id":8
                 }
         }
 }
