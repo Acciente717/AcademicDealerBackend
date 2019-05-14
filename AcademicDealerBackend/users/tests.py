@@ -1,6 +1,7 @@
 from django.test import TransactionTestCase
 from django.urls import reverse
-from .test_utils import *
+from .test_cases.test_register import *
+from .test_cases.test_login import *
 import json
 
 class UsersRegisterTests(TransactionTestCase):
@@ -72,6 +73,99 @@ class UsersRegisterTests(TransactionTestCase):
         for req, expected_resp in \
             zip(user_register_req_bad_req_types, user_register_resp_bad_req_types):
             resp = self.client.post(reverse('users:register'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content))
+    
+
+class UsersLoginTests(TransactionTestCase):
+
+    def test_login_normals(self):
+        '''
+        Normal login. Should be successful.
+        '''
+
+        for req in user_login_create_users:
+            resp = self.client.post(reverse('users:register'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(0, json.loads(resp.content)['content']['data']['status'])
+
+        for req, expected_resp in \
+            zip(user_login_req_normals, user_login_resp_normals):
+            resp = self.client.post(reverse('users:login'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content))
+
+    def test_login_wrong_password(self):
+        '''
+        Wrong password. Should return status code 1.
+        '''
+
+        for req in user_login_create_users:
+            resp = self.client.post(reverse('users:register'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(0, json.loads(resp.content)['content']['data']['status'])
+
+        for req, expected_resp in \
+            zip(user_login_req_wrong_passwords, user_login_resp_wrong_passwords):
+            resp = self.client.post(reverse('users:login'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content))
+
+    def test_login_no_user(self):
+        '''
+        Email not found. Should return status code 2.
+        '''
+
+        for req in user_login_create_users:
+            resp = self.client.post(reverse('users:register'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(0, json.loads(resp.content)['content']['data']['status'])
+
+        for req, expected_resp in \
+            zip(user_login_req_no_users, user_login_resp_no_users):
+            resp = self.client.post(reverse('users:login'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content))
+    
+    def test_login_missing_field(self):
+        '''
+        Missing field in JSON. Should return status code 3.
+        '''
+
+        for req in user_login_create_users:
+            resp = self.client.post(reverse('users:register'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(0, json.loads(resp.content)['content']['data']['status'])
+
+        for req, expected_resp in \
+            zip(user_login_req_missing_fields, user_login_resp_missing_fields):
+            resp = self.client.post(reverse('users:login'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content))
+
+    def test_login_bad_types(self):
+        '''
+        Bad request type in JSON. Should return status code 5.
+        '''
+        
+        for req in user_login_create_users:
+            resp = self.client.post(reverse('users:register'), req,
+                content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(0, json.loads(resp.content)['content']['data']['status'])
+
+        for req, expected_resp in \
+            zip(user_login_req_bad_types, user_login_resp_bad_types):
+            resp = self.client.post(reverse('users:login'), req,
                 content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content))
