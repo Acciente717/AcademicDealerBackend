@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from .models import ProjectInfo, ProjectMember, UserAccount, Comment
 from django.utils import timezone
-from datetime import datetime
 import json
 from .utils import *
 
@@ -203,12 +202,6 @@ def view(request):
     except (json.JSONDecodeError, BadJSONType):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
-    
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
-    
     except (PROJECT_ID_ERROR, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
@@ -434,7 +427,8 @@ def comment_create(request):
         comment = Comment(
             project = project,
             owner = user,
-            modified_date = datetime.now(),
+            create_date = timezone.now(),
+            modified_date = timezone.now(),
             description = json_content_data['description']
         )
         comment.save()
@@ -456,7 +450,7 @@ def comment_create(request):
 
     else:
     # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, comment.id))
+        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
@@ -479,15 +473,15 @@ def comment_edit(request):
 
         json_content_data = decoded['content']['data']
         
-        if "id" not in json_content_data:
+        if "comment_id" not in json_content_data:
             raise COMMENT_ID_ERROR
         
-        comment = Comment.objects.get(id=json_content_data['id'])
+        comment = Comment.objects.get(id=json_content_data['comment_id'])
 
         if comment.owner != user:
             raise PERMISSION_DENY
 
-        comment.modified_date = datetime.now()
+        comment.modified_date = timezone.now()
         comment.description = json_content_data['description'].replace('\n', '\\n')
         comment.save()
 
@@ -511,7 +505,7 @@ def comment_edit(request):
 
     else:
     # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, comment.id))
+        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
@@ -534,10 +528,10 @@ def comment_delete(request):
 
         json_content_data = decoded['content']['data']
         
-        if "id" not in json_content_data:
+        if "comment_id" not in json_content_data:
             raise COMMENT_ID_ERROR
         
-        comment_id = json_content_data['id']
+        comment_id = json_content_data['comment_id']
         comment = Comment.objects.get(id=comment_id)
 
         if comment.owner != user:
@@ -565,7 +559,45 @@ def comment_delete(request):
 
     else:
     # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, comment_id))
+        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def comment_view(request):
+    action = 'comment_view'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'comment_view')
+
+        json_content_data = decoded['content']['data']
+        
+        if "comment_id" not in json_content_data:
+            raise COMMENT_ID_ERROR
+        
+        comment_id = json_content_data['comment_id']
+        comment = Comment.objects.get(id=comment_id)
+
+        response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, comment)
+        
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except (COMMENT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+
+    # other unknown exceptions
+    except Exception as e:
+        print("error", e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(response_msg)
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp

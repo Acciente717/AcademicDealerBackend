@@ -9,11 +9,10 @@
     "content_type":"project",
     "content":
         {
-            "action":"comment_edit",
+            "action":"comment_view",
             "data":
                 {
-                    "comment_id":8,
-                    "description":"edit comment.edit comment.edit comment."
+                    "comment_id":9
                 }
         }
 }

@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 # labinfo status code
 # 0 -- success
 # 1 -- no project
@@ -10,6 +12,8 @@
 # 8 -- project id error
 # 9 -- user already in the project
 # 10 -- other failure
+# 11 -- comment id error
+
 STATUS_SUCCESS = 0
 STATUS_NO_PROJECT = 1
 STATUS_OUTDATED = 2
@@ -97,6 +101,24 @@ def gen_success_response(action, status, id):
 ''' % (action, status, id)
     return response_msg
 
+def gen_success_response_comment(action, status, id):
+    response_msg = '''
+{
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "comment_id":%d
+        }
+    }
+}
+''' % (action, status, id)
+    return response_msg
+
 def build_project_view(action, status, id, project, members):
     resp = '''\
 {
@@ -119,8 +141,30 @@ def build_project_view(action, status, id, project, members):
         }
     }
 }''' % (action, status, id, project.name, project.owner.email,
-        project.start_date, project.end_date, project.member_total_need,
+        timezone.localtime(project.start_date), timezone.localtime(project.end_date), project.member_total_need,
         project.description, members)
+    return resp
+
+def build_comment_view(action, status, id, comment):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "comment_id":%d,
+            "owner":"%s",
+            "create_date":"%s",
+            "modified_date":"%s",
+            "description":"%s"
+        }
+    }
+}''' % (action, status, id, comment.owner.email,
+        timezone.localtime(comment.create_date), timezone.localtime(comment.modified_date), comment.description)
     return resp
 
 def build_search_result(action, status, ids, start, end):

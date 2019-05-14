@@ -491,13 +491,13 @@ seminar_info = {
 }
 ```
 
-### Comment
+### Project Comment
 
 ```haskell
 prefix data.content
 
 comment = {
-  id = Number,  -- when creating, id == -1
+  id = Number,  -- when creating, id == project_id
   action = Encode data,
   data = Object ( create | edit | delete | view )
 }
@@ -510,23 +510,22 @@ when data.dir == "request"
 prefix data.content.comment.data
 
 create = {
-  target = Number ( 0 -- lab
-                  | 1 -- project
-                  | 2 -- seminar
-                  | 3 -- comment
-                  | 4 -- other
-                  ),
-  target_id = Number,
-  content = String  -- markdown format
+  comment_id = Number,
+  description = String  -- markdown format
 }
 
 edit = {
-  content = String  -- markdown format
+  comment_id = Number,
+  description = String  -- markdown format
 }
 
-delete = { }
+delete = { 
+  comment_id = Number
+}
 
-view = { }
+view = {
+  comment_id = Number
+}
 ```
 
 #### Response
@@ -535,25 +534,26 @@ view = { }
 when data.dir == "response"
 prefix data.content.comment.data
 
-create = { status }
+create = { status, comment_id = Number }
 
-edit = { status }
+edit = { status, comment_id }
 
-delete = { status }
+delete = { status, comment_id }
 
-view = {
-  status = Number ( 0 -- success
-                  | 1 -- no such comment
-                  | 2 -- other failure
-                  ),
-  user_email = String, -- email format
-  sub_comments = [ comment_id = Number ],
-  content = String -- markdown format
-}
+view = { status, comment_id }
 
-status = Number ( 0 -- success
-                | 1 -- invalid account
-                | 2 -- permission denied
-                | 3 -- other failure
+status = Number (
+                  0 -- success
+                  1 -- no project
+                  2 -- project outdated
+                  3 -- permission deny
+                  4 -- user login fail
+                  5 -- project quota is full 
+                  6 -- user not in the project
+                  7 -- json corrupt
+                  8 -- project id error
+                  9 -- user already in the project
+                  10 -- other failure
+                  11 -- comment id error
                 )
 ```

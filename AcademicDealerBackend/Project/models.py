@@ -16,5 +16,6 @@ class ProjectMember(models.Model):
 class Comment(models.Model):
     project = models.ForeignKey(ProjectInfo, on_delete=models.CASCADE)
     owner = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    create_date = models.DateTimeField()
     modified_date = models.DateTimeField()
     description = models.TextField()
