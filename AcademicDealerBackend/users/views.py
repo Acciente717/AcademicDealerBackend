@@ -9,6 +9,7 @@ import json
 from Project.models import ProjectInfo, ProjectMember
 from .utils import *
 
+
 def register(request):
     try:
         # decode http content to JSON
@@ -24,16 +25,16 @@ def register(request):
         json_signature = decoded['signature']
         json_content_data = decoded['content']['data']
         new_user = UserAccount(
-            email = json_signature['user_email'],
-            pw_hash = json_signature['password_hash'],
-            real_name = json_content_data['real_name'],
-            nick_name = json_content_data['nick_name'],
-            pic_url = json_content_data['pic_url'],
-            school = json_content_data['school'],
-            department = json_content_data['department'],
-            title = json_content_data['title'],
-            enrollment_date = json_content_data['enrollment_date'],
-            profile = json_content_data['profile'].replace('\n', '\\n')
+            email=json_signature['user_email'],
+            pw_hash=json_signature['password_hash'],
+            real_name=json_content_data['real_name'],
+            nick_name=json_content_data['nick_name'],
+            pic_url=json_content_data['pic_url'],
+            school=json_content_data['school'],
+            department=json_content_data['department'],
+            title=json_content_data['title'],
+            enrollment_date=json_content_data['enrollment_date'],
+            profile=json_content_data['profile'].replace('\n', '\\n')
         )
         new_user.save()
 
@@ -68,6 +69,7 @@ def register(request):
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
+
 
 def login(request):
     try:
@@ -116,6 +118,7 @@ def login(request):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def view(request):
     try:
         # decode http content to JSON
@@ -130,9 +133,9 @@ def view(request):
         # search database
         user = UserAccount.objects.get(email=decoded['signature']['user_email'])
         labs = []
-        projects_create = [i.id for i in ProjectInfo.objects.filter(owner=user.id)]\
+        projects_create = [i.id for i in ProjectInfo.objects.filter(owner=user.id)] \
             if decoded['content']['data']['project_create'] else []
-        projects_attend = [i.project.id for i in ProjectMember.objects.filter(person=user.id)]\
+        projects_attend = [i.project.id for i in ProjectMember.objects.filter(person=user.id)] \
             if decoded['content']['data']['project_attend'] else []
         seminars_create = []
         seminars_attend = []
@@ -169,6 +172,7 @@ def view(request):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def edit(request):
     try:
         # decode http content to JSON
@@ -179,7 +183,7 @@ def edit(request):
         assert_dir(decoded, 'request')
         assert_content_type(decoded, 'account')
         assert_account_action(decoded, 'edit')
- 
+
         # search database and compare password
         json_content_data = decoded['content']['data']
         user = UserAccount.objects.get(email=decoded['signature']['user_email'])
@@ -237,6 +241,7 @@ def edit(request):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def delete(request):
     try:
         # decode http content to JSON
@@ -252,7 +257,7 @@ def delete(request):
         user = UserAccount.objects.get(email=decoded['signature']['user_email'])
         if user.pw_hash != decoded['signature']['password_hash']:
             raise BadPassword
-        
+
         # delete user
         user.delete()
 
