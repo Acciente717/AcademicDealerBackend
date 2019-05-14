@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 import json
+from Project.models import ProjectInfo, ProjectMember
 from .utils import *
 
 def register(request):
@@ -128,9 +129,18 @@ def view(request):
 
         # search database
         user = UserAccount.objects.get(email=decoded['signature']['user_email'])
+        labs = []
+        projects_create = [i.id for i in ProjectInfo.objects.filter(owner=user.id)]\
+            if decoded['content']['data']['project_create'] else []
+        projects_attend = [i.project.id for i in ProjectMember.objects.filter(person=user.id)]\
+            if decoded['content']['data']['project_attend'] else []
+        seminars_create = []
+        seminars_attend = []
+        comments = []
 
         # build response JSON
-        resp = build_user_bio_json(user)
+        resp = build_user_bio_json(user, labs, projects_create, projects_attend,
+                                   seminars_create, seminars_attend, comments)
 
     # email not found
     except UserAccount.DoesNotExist:
