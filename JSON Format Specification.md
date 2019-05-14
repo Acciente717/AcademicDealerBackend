@@ -482,8 +482,8 @@ seminar_info = {
   id = Number,       -- when creating, id == -1
   name = String,
   owner = user_email,
-  date = String,     -- date format
-  duration = String, -- time period format
+  start_date = String,     -- date format
+  end_date = String, -- date format
   member_number_limit = Number,
   current_members = [ user_email ],
   comments = [ comment_id = Number ],

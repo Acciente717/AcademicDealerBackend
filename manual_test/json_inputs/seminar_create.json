@@ -1,0 +1,22 @@
+{
+    "dir":"request",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"haha@163.com",
+            "password_hash":"23333333"
+        },
+    "content_type":"seminar",
+    "content":
+        {
+            "action":"create",
+            "data":
+                {
+                    "name":"seminar 416666",
+                    "start_date":"2020-01-01",
+                    "end_date":"2030-01-01",
+                    "member_number_limit":"3",
+                    "description":"This is a stupid seminar."
+                }
+        }
+}

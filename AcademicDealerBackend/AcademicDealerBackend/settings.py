@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'projectinfo.apps.ProjectinfoConfig',
     'users.apps.UsersConfig',
     'Project.apps.ProjectConfig',
+    'seminar.apps.SeminarConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
