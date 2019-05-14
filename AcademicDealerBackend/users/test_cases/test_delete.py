@@ -1,35 +1,35 @@
-__user_reset_password_req_normal = {
+__user_delete_req_normal = {
     "dir": "request",
     "signature":
         {
             "is_user": True,
-            "user_email": "login@test.com",
+            "user_email": "normal0@test.com",
             "password_hash": "3333"
         },
     "content_type": "account",
     "content":
         {
-            "action": "reset_password",
+            "action": "delete",
             "data": {}
         }
 }
 
-user_reset_password_req_normals = [
-    __user_reset_password_req_normal
+user_delete_req_normals = [
+    __user_delete_req_normal
 ]
 
-__user_reset_password_resp_normal = {
+__user_delete_resp_normal = {
     "dir": "response",
     "signature":
         {
             "is_user": True,
-            "user_email": "login@test.com",
+            "user_email": "normal0@test.com",
             "password_hash": "3333"
         },
     "content_type": "account",
     "content":
         {
-            "action": "reset_password",
+            "action": "delete",
             "data":
                 {
                     "status": 0
@@ -37,8 +37,8 @@ __user_reset_password_resp_normal = {
         }
 }
 
-user_reset_password_resp_normals = [
-    __user_reset_password_resp_normal
+user_delete_resp_normals = [
+    __user_delete_resp_normal
 ]
 
 # references
