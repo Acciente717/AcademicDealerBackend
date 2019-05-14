@@ -21,6 +21,7 @@ STATUS_CORRUPTED_JSON = 7
 STATUS_PROJECT_ID_ERROR = 8
 STATUS_ALREADY_IN = 9
 STATUS_OTHER_FAILURE = 10
+STATUS_COMMENT_ID_ERROR = 11
 
 class LoginFail(RuntimeError):
     pass
@@ -32,6 +33,9 @@ class PERMISSION_DENY(RuntimeError):
     pass
 
 class PROJECT_ID_ERROR(RuntimeError):
+    pass
+
+class COMMENT_ID_ERROR(RuntimeError):
     pass
 
 class OUTDATE(RuntimeError):
