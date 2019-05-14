@@ -85,7 +85,7 @@ def gen_success_response(action, status, id):
         "action":"%s",
         "data":
         {
-            "status":%d
+            "status":%d,
             "id":%d
         }
     }
