@@ -188,7 +188,7 @@ class UsersLoginTests(TransactionTestCase):
 #             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
 class UserDeleteTests(TransactionTestCase):
-    def test_delete_normals(self):
+    def test_normals(self):
         '''
         Normal. Should be successful.
         '''
@@ -202,6 +202,18 @@ class UserDeleteTests(TransactionTestCase):
 
         for req, expected_resp in \
                 zip(user_delete_req_normals, user_delete_resp_normals):
+            resp = self.client.post(reverse('users:delete'), req,
+                                    content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+    def test_nonexists(self):
+        '''
+        Normal. Should be successful.
+        '''
+
+        for req, expected_resp in \
+                zip(user_delete_req_nonexists, user_delete_resp_nonexists):
             resp = self.client.post(reverse('users:delete'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
