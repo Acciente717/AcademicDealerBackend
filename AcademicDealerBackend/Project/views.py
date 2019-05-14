@@ -146,6 +146,10 @@ def delete(request):
         
         project_id = json_content_data['id']
         project = ProjectInfo.objects.get(id=project_id)
+
+        if project.owner != user:
+            raise PERMISSION_DENY
+
         project.delete()
 
     # bad JSON format
@@ -508,6 +512,60 @@ def comment_edit(request):
     else:
     # success
         http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, comment.id))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def comment_delete(request):
+    action = 'comment_delete'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'comment_delete')
+
+        json_signature = decoded['signature']
+        if json_signature['is_user'] != True:
+            raise LoginFail
+        user = UserAccount.objects.get(email=json_signature['user_email'])
+        if user.pw_hash != json_signature['password_hash']:
+            raise LoginFail
+
+        json_content_data = decoded['content']['data']
+        
+        if "id" not in json_content_data:
+            raise COMMENT_ID_ERROR
+        
+        comment_id = json_content_data['id']
+        comment = Comment.objects.get(id=comment_id)
+
+        if comment.owner != user:
+            raise PERMISSION_DENY
+
+        comment.delete()
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except LoginFail:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    
+    except (COMMENT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+
+    except PERMISSION_DENY:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+
+    # other unknown exceptions
+    except Exception as e:
+        print("error", e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, comment_id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
