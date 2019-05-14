@@ -90,8 +90,10 @@ delete = { }
 
 view = {
 	lab = Boolean,
-	project = Boolean,
-  seminar = Boolean,
+	project_create = Boolean,
+	project_attend = Boolean,
+  seminar_create = Boolean,
+  seminar_attend = Boolean,
   comment = Boolean
 } -- request to view a given account's view
 ```
@@ -198,8 +200,10 @@ bio = {
   enrollment_date = String, -- date format
   -- when registering and editting, the following four fields need to be empty
   labs = [ lab_id = Number ], -- if the lab is on site
-  projects = [ project_id = Number ],
-  seminars = [ seminar_id = Number ],
+  projects_create = [ project_id = Number ],
+  projects_attend = [ project_id = Number ],
+  seminars_create = [ seminar_id = Number ],
+  seminars_attend = [ seminar_id = Number ],
   comments = [ comment_id = Number ],
   profile = String          -- markdown format
 }

@@ -13,8 +13,10 @@
             "data": 
                 {
                     "lab":false,
-                    "project":false,
-                    "seminar":false,
+                    "project_create":true,
+                    "project_attend":true,
+                    "seminar_create":false,
+                    "seminar_attend":false,
                     "comment":false
                 }
         }

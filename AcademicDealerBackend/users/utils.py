@@ -233,7 +233,8 @@ def gen_login_fail(dic, errno):
 ''' % (errno)
     return resp
 
-def build_user_bio_json(user):
+def build_user_bio_json(user, labs, projects_create, projects_attend,
+                        seminars_create, seminars_attend, comments):
     resp = '''\
 {
     "dir":"response",
@@ -259,17 +260,22 @@ def build_user_bio_json(user):
                             "department":"%s",
                             "title":"%s",
                             "enrollment_date":"%s",
-                            "labs":{},
-                            "projects":{},
-                            "seminars":{},
-                            "comments":{},
+                            "labs":%s,
+                            "projects_create":%s,
+                            "projects_attend":%s,
+                            "seminars_create":%s,
+                            "seminars_attend":%s,
+                            "comments":%s,
                             "profile":"%s"
                         }
                 }
         }
 }''' % (user.email, user.pw_hash, VIEW_SUCCESS, user.real_name,
         user.nick_name, user.pic_url, user.school, user.department,
-        user.title, user.enrollment_date, user.profile)
+        user.title, user.enrollment_date, repr(labs),
+        repr(projects_create), repr(projects_attend),
+        repr(seminars_create), repr(seminars_attend),
+        repr(comments), user.profile)
     return resp
 
 def gen_view_fail(dic, errno):
