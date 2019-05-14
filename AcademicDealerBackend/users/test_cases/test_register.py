@@ -19,10 +19,12 @@ __user_register_req_normal0 = {
                     "department":"White House",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -49,10 +51,12 @@ __user_register_req_normal1 = {
                     "department":"White House",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -79,10 +83,12 @@ __user_register_req_duplicate_email = {
                     "department":"White House",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -109,10 +115,12 @@ __user_register_req_duplicate_nickname = {
                     "department":"White House",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -139,10 +147,12 @@ __user_register_req_invalid_date = {
                     "department":"Invalid Department",
                     "title":"Other",
                     "enrollment_date":"01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -168,10 +178,12 @@ __user_register_req_missing_field = {
                     "department":"Invalid Department",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -198,10 +210,12 @@ __user_register_req_bad_req_type0 = {
                     "department":"Invalid Department",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -226,10 +240,12 @@ __user_register_req_bad_req_type1 = {
                     "department":"Invalid Department",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
@@ -254,10 +270,12 @@ __user_register_req_bad_req_type2 = {
                     "department":"Invalid Department",
                     "title":"Other",
                     "enrollment_date":"2000-01-01",
-                    "labs":{},
-                    "projects":{},
-                    "seminars":{},
-                    "comments":{},
+                    "labs":[],
+                    "projects_create":[],
+                    "projects_attend":[],
+                    "seminars_create":[],
+                    "seminars_attend":[],
+                    "comments":[],
                     "profile":"#### Profile title\nProfile content\n"
                 }
         }
