@@ -87,3 +87,46 @@ user_delete_resp_nonexists = [
 ]
 
 # references
+
+__user_delete_req_wrong_password = {
+    "dir": "request",
+    "signature":
+        {
+            "is_user": True,
+            "user_email": "normal0@test.com",
+            "password_hash": "3332"
+        },
+    "content_type": "account",
+    "content":
+        {
+            "action": "delete",
+            "data": {}
+        }
+}
+
+user_delete_req_wrong_passwords = [
+    __user_delete_req_normal
+]
+
+__user_delete_resp_wrong_password = {
+    "dir": "response",
+    "signature":
+        {
+            "is_user": True,
+            "user_email": "normal0@test.com",
+            "password_hash": "3332"
+        },
+    "content_type": "account",
+    "content":
+        {
+            "action": "delete",
+            "data":
+                {
+                    "status": 1
+                }
+        }
+}
+
+user_delete_resp_wrong_passwords = [
+    __user_delete_resp_normal
+]
