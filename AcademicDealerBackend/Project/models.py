@@ -13,7 +13,7 @@ class ProjectMember(models.Model):
     project = models.ForeignKey(ProjectInfo, on_delete=models.CASCADE)
     person = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
 
-class Comment(models.Model):
+class ProjectComment(models.Model):
     project = models.ForeignKey(ProjectInfo, on_delete=models.CASCADE)
     owner = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     create_date = models.DateTimeField()
