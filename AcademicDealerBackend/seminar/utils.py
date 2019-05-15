@@ -1,26 +1,28 @@
 # labinfo status code
 # 0 -- success
-# 1 -- no seminar
-# 2 -- seminar outdated
-# 3 -- permission deny
-# 4 -- user login fail
-# 5 -- seminar quota is full 
-# 6 -- user not in the seminar
-# 7 -- json corrupt
-# 8 -- seminar id error
-# 9 -- user already in the seminar
-# 10 -- other failure
+# 1 -- other failure
+# 2 -- no seminar
+# 3 -- seminar outdated
+# 4 -- permission deny
+# 5 -- user login fail
+# 6 -- seminar quota is full 
+# 7 -- user not in the seminar
+# 8 -- json corrupt
+# 9 -- seminar id error
+# 10 -- user already in the seminar
+# 11 -- owner cannot join its own seminar
 STATUS_SUCCESS = 0
-STATUS_NO_PROJECT = 1
-STATUS_OUTDATED = 2
-STATUS_PERMISSION_DENY = 3
-STATUS_LOGIN_FAIL = 4
-STATUS_ALREADY_FULL = 5
-STATUS_NOT_IN = 6
-STATUS_CORRUPTED_JSON = 7
-STATUS_PROJECT_ID_ERROR = 8
-STATUS_ALREADY_IN = 9
-STATUS_OTHER_FAILURE = 10
+STATUS_OTHER_FAILURE = 1
+STATUS_NO_SEMINAR = 2
+STATUS_OUTDATED = 3
+STATUS_PERMISSION_DENY = 4
+STATUS_LOGIN_FAIL = 5
+STATUS_ALREADY_FULL = 6
+STATUS_NOT_IN = 7
+STATUS_CORRUPTED_JSON = 8
+STATUS_PROJECT_ID_ERROR = 9
+STATUS_ALREADY_IN = 10
+STATUS_IS_OWNER = 11
 
 class LoginFail(RuntimeError):
     pass
@@ -28,22 +30,22 @@ class LoginFail(RuntimeError):
 class BadJSONType(RuntimeError):
     pass
 
-class PERMISSION_DENY(RuntimeError):
+class PermissionDenied(RuntimeError):
     pass
 
-class PROJECT_ID_ERROR(RuntimeError):
+class SeminarIDError(RuntimeError):
     pass
 
-class OUTDATE(RuntimeError):
+class SeminarOutDated(RuntimeError):
     pass
 
-class ALREADY_IN(RuntimeError):
+class UserAlreadyIn(RuntimeError):
     pass
 
-class ALREADY_FULL(RuntimeError):
+class SeminarAlreadyFull(RuntimeError):
     pass
 
-class NOT_IN(RuntimeError):
+class UserNotIn(RuntimeError):
     pass
 
 def assert_dir(dic, val):

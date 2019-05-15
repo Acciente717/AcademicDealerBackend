@@ -84,12 +84,12 @@ def edit(request):
         json_content_data = decoded['content']['data']
 
         if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
+            raise SeminarIDError
 
         seminar = SeminarInfo.objects.get(id=json_content_data['id'])
 
         if seminar.owner != user:
-            raise PERMISSION_DENY
+            raise PermissionDenied
 
         seminar.name = json_content_data['name']
         seminar.start_date = json_content_data['start_date']
@@ -106,10 +106,10 @@ def edit(request):
     except LoginFail:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
     
-    except PERMISSION_DENY:
+    except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+    except (SeminarIDError, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -147,13 +147,14 @@ def delete(request):
         json_content_data = decoded['content']['data']
         
         if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-
-        if seminar.owner != user:
-            raise PERMISSION_DENY
+            raise SeminarIDError
 
         seminar_id = json_content_data['id']
         seminar = SeminarInfo.objects.get(id=seminar_id)
+
+        if seminar.owner != user:
+            raise PermissionDenied
+
         seminar.delete()
 
     # bad JSON format
@@ -163,10 +164,10 @@ def delete(request):
     except LoginFail:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
     
-    except PERMISSION_DENY:
+    except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+    except (SeminarIDError, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -196,7 +197,7 @@ def view(request):
         json_content_data = decoded['content']['data']
 
         if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
+            raise SeminarIDError
 
         seminar_id = json_content_data['id']
         seminar = SeminarInfo.objects.get(id=seminar_id)
@@ -213,10 +214,10 @@ def view(request):
     except LoginFail:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
-    except PERMISSION_DENY:
+    except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
 
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+    except (SeminarIDError, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -254,18 +255,18 @@ def join(request):
         json_content_data = decoded['content']['data']
 
         if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
+            raise SeminarIDError
 
         seminar_id = json_content_data['id']
         seminar = SeminarInfo.objects.get(id=seminar_id)
 
         if timezone.now() > seminar.end_date:
-            raise OUTDATE
+            raise SeminarOutDated
 
         members = [i.person for i in SeminarMember.objects.filter(seminar=seminar)]
 
         if user in members:
-            raise ALREADY_IN
+            raise UserAlreadyIn
 
         seminar_member = SeminarMember(
             seminar = seminar,
@@ -274,7 +275,7 @@ def join(request):
         seminar_member.save()
 
         if len(members) >= seminar.member_number_limit:
-            raise ALREADY_FULL
+            raise SeminarAlreadyFull
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
@@ -283,19 +284,19 @@ def join(request):
     except LoginFail:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
-    except PERMISSION_DENY:
+    except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
 
-    except OUTDATE:
+    except SeminarOutDated:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
 
-    except ALREADY_IN:
+    except UserAlreadyIn:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_IN))
 
-    except ALREADY_FULL:
+    except SeminarAlreadyFull:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_FULL))
 
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+    except (SeminarIDError, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -333,18 +334,18 @@ def drop(request):
         json_content_data = decoded['content']['data']
 
         if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
+            raise SeminarIDError
 
         seminar_id = json_content_data['id']
         seminar = SeminarInfo.objects.get(id=seminar_id)
 
         if timezone.now() > seminar.end_date:
-            raise OUTDATE
+            raise SeminarOutDated
 
         members = [i.person for i in SeminarMember.objects.filter(seminar=seminar)]
 
         if user not in members:
-            raise NOT_IN
+            raise UserNotIn
 
         seminar_member = SeminarMember.objects.get(
             seminar = seminar,
@@ -359,16 +360,16 @@ def drop(request):
     except LoginFail:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
     
-    except PERMISSION_DENY:
+    except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
     
-    except OUTDATE:
+    except SeminarOutDated:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
     
-    except NOT_IN:
+    except UserNotIn:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_NOT_IN))
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+    except (SeminarIDError, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -444,7 +445,7 @@ def comment_create(request):
         json_content_data = decoded['content']['data']
         
         if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
+            raise SeminarIDError
         
         seminar = SeminarInfo.objects.get(id=json_content_data['id'])
 
@@ -463,7 +464,7 @@ def comment_create(request):
     except LoginFail:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+    except (SeminarIDError, ObjectDoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
