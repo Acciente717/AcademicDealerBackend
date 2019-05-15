@@ -43,10 +43,11 @@ def create(request):
         new_seminar.save()
 
     # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
     # other unknown exceptions
@@ -54,8 +55,8 @@ def create(request):
         print(e)
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
 
-    else:
     # success
+    else:
         http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_seminar.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
@@ -100,16 +101,19 @@ def edit(request):
         seminar.save()
 
     # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
     
+    # insufficient privelidge
     except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
-    
-    except (SeminarIDError, ObjectDoesNotExist):
+
+    # seminar id error or missing
+    except (SeminarIDError, SeminarInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -158,16 +162,19 @@ def delete(request):
         seminar.delete()
 
     # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
-    
+
+    # insufficient priviledge
     except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
-    
-    except (SeminarIDError, ObjectDoesNotExist):
+
+    # seminar ID error or missing
+    except (SeminarIDError, SeminarInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -208,16 +215,18 @@ def view(request):
         response_msg = build_seminar_view(action, STATUS_SUCCESS, seminar_id, seminar, members)
 
     # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
+    # insufficient priviledge
     except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
 
-    except (SeminarIDError, ObjectDoesNotExist):
+    except (SeminarIDError, SeminarInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -292,7 +301,7 @@ def join(request):
     except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
 
-    # seminar is already finished
+    # seminar has already finished
     except SeminarOutDated:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
 
@@ -363,22 +372,27 @@ def drop(request):
         seminar_member.delete()
 
     # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
-    
+
+    # insufficient priviledge
     except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
-    
+
+    # seminar has already finished
     except SeminarOutDated:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
-    
+
+    # user is not in the seminar participant list
     except UserNotIn:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_NOT_IN))
-    
-    except (SeminarIDError, ObjectDoesNotExist):
+
+    # seminar ID error or missing
+    except (SeminarIDError, SeminarInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -418,10 +432,10 @@ def search(request):
 
         resp = build_search_result(action, STATUS_SUCCESS, response_ids,
                                    json_content_data['offset'],
-                                   json_content_data['length'])
+                                   json_content_data['offset'] + json_content_data['length'])
 
     # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
     # other unknown exceptions
@@ -431,7 +445,7 @@ def search(request):
 
     else:
         http_resp = HttpResponse(resp)
-    
+
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
