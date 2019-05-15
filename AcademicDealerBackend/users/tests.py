@@ -4,6 +4,7 @@ from .test_cases.test_register import *
 from .test_cases.test_login import *
 from .test_cases.test_reset_password import *
 from .test_cases.test_delete import *
+from .test_cases.test_edit import *
 import json
 
 
@@ -255,12 +256,33 @@ class UserDeleteTests(TransactionTestCase):
     #         self.assertEqual(resp.status_code, 200)
     #         self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
-    # TODO: flaw in format specification
+    # TODO: flaw in json format specification
     def test_bad_reqs(self):
         self.create_user()
         for req, expected_resp in \
                 zip(user_delete_req_bad_reqs, user_delete_resp_bad_reqs):
             resp = self.client.post(reverse('users:delete'), req,
+                                    content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+
+class UserEditTests(TransactionTestCase):
+    def create_user(self):
+        for req, expected_resp in \
+                zip(user_register_req_normals, user_register_resp_normals):
+            resp = self.client.post(reverse('users:register'), req,
+                                    content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+    def test_normals(self):
+
+        self.create_user()
+
+        for req, expected_resp in \
+                zip(user_edit_req_normals, user_edit_resp_normals):
+            resp = self.client.post(reverse('users:edit'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
