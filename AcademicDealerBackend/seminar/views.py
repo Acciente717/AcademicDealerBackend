@@ -268,6 +268,9 @@ def join(request):
         if user in members:
             raise UserAlreadyIn
 
+        if user == seminar.owner:
+            raise UserIsOwner
+
         seminar_member = SeminarMember(
             seminar = seminar,
             person = user,
@@ -277,26 +280,32 @@ def join(request):
         if len(members) >= seminar.member_number_limit:
             raise SeminarAlreadyFull
 
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    # bad JSON structure or missing field
+    except (json.JSONDecodeError, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # failed to login user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
+    # insufficient priviledge to delete
     except PermissionDenied:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
 
+    # seminar is already finished
     except SeminarOutDated:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
 
+    # user is already in the participant list
     except UserAlreadyIn:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_IN))
 
+    # seminar quota is full
     except SeminarAlreadyFull:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_FULL))
 
-    except (SeminarIDError, ObjectDoesNotExist):
+    # seminar ID is wrong or missing
+    except (SeminarIDError, SeminarInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
 
     # other unknown exceptions
@@ -304,8 +313,8 @@ def join(request):
         print(e)
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
 
-    else:
     # success
+    else:
         http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
