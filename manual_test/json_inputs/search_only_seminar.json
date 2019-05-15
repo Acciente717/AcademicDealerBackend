@@ -1,0 +1,15 @@
+{
+    "dir": "request",
+    "content_type": "search",
+    "content": {
+        "keyword": "This are",
+        "user_email": "",
+        "user_type": "owner",
+        "search_description": true,
+        "search_lab": false,
+        "search_seminar": false,
+        "search_project": true,
+        "search_outdated": false,
+        "curr_page": 0
+    }
+}
