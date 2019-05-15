@@ -335,6 +335,8 @@ join = { }
 
 drop = { }
 
+getall = { }
+
 search = {
 	keywords = [ keyword = String ], -- keywords are used to intersect query results
 	offset = Number, -- indicate the start number offset of query
@@ -359,6 +361,12 @@ view = { status }
 join = { status }
 
 drop = { status }
+
+getall = { 
+  status = Number,
+	projects = [ id = Number ],
+	total_num = Number -- Total number of projects
+}
 
 search = {
 	status = Number,

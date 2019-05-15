@@ -137,13 +137,33 @@ def build_project_view(action, status, id, project, members, comments):
             "end_date":"%s",
             "member_total_need":%d,
             "description":"%s",
+            "create_date":"%s",
+            "modified_date":"%s",
             "current_members":%s
             "comments":%s
         }
     }
 }''' % (action, status, id, project.name, project.owner.email,
         timezone.localtime(project.start_date), timezone.localtime(project.end_date), project.member_total_need,
-        project.description, members, comments)
+        project.description, timezone.localtime(project.create_date), timezone.localtime(project.modified_date), members, comments)
+    return resp
+
+def build_project_list_view(action, status, projects):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "projects":%s,
+            "total_num":%d
+        }
+    }
+}''' % (action, status, repr(projects[:100]), len(projects))
     return resp
 
 def build_comment_view(action, status, id, comment):
@@ -168,7 +188,7 @@ def build_comment_view(action, status, id, comment):
         timezone.localtime(comment.create_date), timezone.localtime(comment.modified_date), comment.description)
     return resp
 
-def build_search_result(action, status, ids, start, end):
+def build_search_result(action, status, ids, start, len):
     resp = '''\
 {
     "dir":"response",
@@ -180,8 +200,8 @@ def build_search_result(action, status, ids, start, end):
         {
             "status":%s,
             "ids":%s,
-            "total_num":%s
+            "total_num":%d
         }
     }
-}''' % (action, status, repr(ids[start:end]), len(ids))
+}''' % (action, status, repr(ids[start:start + len]), len(ids))
     return resp
