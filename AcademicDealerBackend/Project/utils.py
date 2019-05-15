@@ -139,7 +139,7 @@ def build_project_view(action, status, id, project, members, comments):
             "description":"%s",
             "create_date":"%s",
             "modified_date":"%s",
-            "current_members":%s
+            "current_members":%s,
             "comments":%s
         }
     }
