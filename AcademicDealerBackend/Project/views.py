@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from .models import ProjectInfo, ProjectMember, UserAccount, Comment
+from .models import ProjectInfo, ProjectMember, UserAccount, ProjectComment
 from django.utils import timezone
 import json
 from .utils import *
@@ -82,6 +82,8 @@ def create(request):
             owner = user,
             start_date = json_content_data['start_date'],
             end_date = json_content_data['end_date'],
+            create_date = timezone.now(),
+            modified_date = timezone.now(),
             member_total_need = json_content_data['member_total_need'],
             description = json_content_data['description'].replace('\n', '\\n')
         )
@@ -143,6 +145,7 @@ def edit(request):
         project.end_date = json_content_data['end_date']
         project.member_total_need = json_content_data['member_total_need']
         project.description = json_content_data['description'].replace('\n', '\\n')
+        project.modified_date = timezone.now()
 
         project.save()
 
@@ -245,10 +248,41 @@ def view(request):
         members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
         members = members.replace("'", '"')
         
-        comments = repr([i.id for i in Comment.objects.filter(project=project)])
-        comments = comments.replace("'", '"')
+        comments = repr([i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')])
 
         response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(response_msg)
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def getall(request):
+    action = 'getall'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'getall')
+
+        projects = [i.id for i in ProjectInfo.objects.order_by('modified_date')]
+
+        response_msg = build_project_list_view(action, STATUS_SUCCESS, projects)
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
@@ -476,14 +510,17 @@ def comment_create(request):
         
         project = ProjectInfo.objects.get(id=json_content_data['id'])
 
-        comment = Comment(
+        project.modified_date = timezone.now()
+        project.save()
+
+        project_comment = ProjectComment(
             project = project,
             owner = user,
             create_date = timezone.now(),
             modified_date = timezone.now(),
             description = json_content_data['description']
         )
-        comment.save()
+        project_comment.save()
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
@@ -502,7 +539,7 @@ def comment_create(request):
 
     else:
     # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment.id))
+        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
@@ -528,14 +565,17 @@ def comment_edit(request):
         if "comment_id" not in json_content_data:
             raise COMMENT_ID_ERROR
         
-        comment = Comment.objects.get(id=json_content_data['comment_id'])
+        project_comment = ProjectComment.objects.get(id=json_content_data['comment_id'])
 
-        if comment.owner != user:
+        if project_comment.owner != user:
             raise PERMISSION_DENY
 
-        comment.modified_date = timezone.now()
-        comment.description = json_content_data['description'].replace('\n', '\\n')
-        comment.save()
+        project_comment.modified_date = timezone.now()
+        project_comment.description = json_content_data['description'].replace('\n', '\\n')
+        project_comment.save()
+
+        project.modified_date = timezone.now()
+        project.save()
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
@@ -557,7 +597,7 @@ def comment_edit(request):
 
     else:
     # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment.id))
+        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
@@ -584,12 +624,12 @@ def comment_delete(request):
             raise COMMENT_ID_ERROR
         
         comment_id = json_content_data['comment_id']
-        comment = Comment.objects.get(id=comment_id)
+        project_comment = ProjectComment.objects.get(id=comment_id)
 
-        if comment.owner != user:
+        if project_comment.owner != user:
             raise PERMISSION_DENY
 
-        comment.delete()
+        project_comment.delete()
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
@@ -631,9 +671,9 @@ def comment_view(request):
             raise COMMENT_ID_ERROR
         
         comment_id = json_content_data['comment_id']
-        comment = Comment.objects.get(id=comment_id)
+        project_comment = ProjectComment.objects.get(id=comment_id)
 
-        response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, comment)
+        response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, project_comment)
         
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):
