@@ -199,7 +199,7 @@ def view(request):
         members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
         members = members.replace("'", '"')
         
-        comments = repr([i.id for i in ProjectComment.objects.filter(project=project)])
+        comments = repr([i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')])
 
         response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
 
@@ -231,7 +231,7 @@ def getall(request):
 
         check_request(decoded, 'getall')
 
-        projects = [i.id for i in ProjectInfo.objects.order_by('create_date')]
+        projects = [i.id for i in ProjectInfo.objects.order_by('modified_date')]
 
         response_msg = build_project_list_view(action, STATUS_SUCCESS, projects)
 
