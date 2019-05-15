@@ -298,3 +298,14 @@ class UserEditTests(TransactionTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
+    def test_wrong_password(self):
+
+        self.create_user()
+
+        for req, expected_resp in \
+                zip(user_edit_req_wrong_passwords, user_edit_resp_wrong_passwords):
+            resp = self.client.post(reverse('users:edit'), req,
+                                    content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
