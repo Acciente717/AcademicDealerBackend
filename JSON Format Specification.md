@@ -284,8 +284,10 @@ lab_info = {
   pic_url = String,        -- url format, picture of members
   logo_url = String,       -- url format
   supervisors = [ lab_bio ],
-  comments = [ comment_id = Number ],
-  description = String     -- markdown format
+  comments = String,
+  description = String,     -- markdown format
+  create_date = String,     -- date format
+	modified_date = String   -- date format
 }
 
 lab_bio = {

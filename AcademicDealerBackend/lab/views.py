@@ -128,9 +128,15 @@ def create(request):
     
     new_lab = LabInfo(
         name = json_content_data['name'],
+        school = json_content_data['school'],
+        department = json_content_data['department'],
         owner = user,
-        start_date = json_content_data['start_date'],
-        end_date = json_content_data['end_date'],
+        address = json_content_data['address'],
+        phone = json_content_data['phone'],
+        front_page_url = json_content_data['front_page_url'],
+        pic_url = json_content_data['pic_url'],
+        logo_url = json_content_data['logo_url'],
+        supervisors = json_content_data['supervisors'],
         create_date = timezone.now(),
         modified_date = timezone.now(),
         description = json_content_data['description'].replace('\n', '\\n')
@@ -161,11 +167,18 @@ def edit(request):
     if lab.owner != user:
         raise PermissionDenied
 
-    lab.name = json_content_data['name']
-    lab.start_date = json_content_data['start_date']
-    lab.end_date = json_content_data['end_date']
+
+    lab.name = json_content_data['name'],
+    lab.school = json_content_data['school'],
+    lab.department = json_content_data['department'],
+    lab.address = json_content_data['address'],
+    lab.phone = json_content_data['phone'],
+    lab.front_page_url = json_content_data['front_page_url'],
+    lab.pic_url = json_content_data['pic_url'],
+    lab.logo_url = json_content_data['logo_url'],
+    lab.supervisors = json_content_data['supervisors'],
+    lab.modified_date = timezone.now(),
     lab.description = json_content_data['description'].replace('\n', '\\n')
-    lab.modified_date = timezone.now()
     lab.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, lab.id))

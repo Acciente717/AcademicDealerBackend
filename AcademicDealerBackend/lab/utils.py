@@ -112,17 +112,23 @@ def build_lab_view(action, status, id, lab, comments):
             "status":%d,
             "id":%d,
             "name":"%s",
+            "school":"%s",#
+            "department":"%s",
             "owner":"%s",
-            "start_date":"%s",
-            "end_date":"%s",
+            "address":"%s",#
+            "phone":"%s",#
+            "front_page_url":"%s",#
+            "pic_url""%s",#
+            "logo_url""%s",#
+            "supervisors""%s",#
             "description":"%s",
             "create_date":"%s",
             "modified_date":"%s",
             "comments":%s
         }
     }
-}''' % (action, status, id, lab.name, lab.owner.email,
-        timezone.localtime(lab.start_date), timezone.localtime(lab.end_date),
+}''' % (action, status, id, lab.name, lab.school, lab.department, lab.owner.email, lab.address,
+        lab.phone, lab.front_page_url, lab.pic_url, lab.logo_url, lab.supervisors,
         lab.description, timezone.localtime(lab.create_date), timezone.localtime(lab.modified_date), comments)
     return resp
 
