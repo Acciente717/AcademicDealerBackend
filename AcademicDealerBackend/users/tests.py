@@ -245,3 +245,12 @@ class UserDeleteTests(TransactionTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
+    # def test_missing_corrupted_jsons(self):
+    #     self.create_user()
+    #     for req, expected_resp in \
+    #             zip(user_delete_req_normals, user_delete_resp_missing_json_fields):
+    #         resp = self.client.post(reverse('users:delete'), corrupt(req),
+    #                                 content_type='application/json')
+    #         self.assertEqual(resp.status_code, 200)
+    #         self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
