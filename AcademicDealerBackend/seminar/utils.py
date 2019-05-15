@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 # labinfo status code
 # 0 -- success
 # 1 -- other failure
@@ -11,6 +13,8 @@
 # 9 -- seminar id error
 # 10 -- user already in the seminar
 # 11 -- owner cannot join its own seminar
+# 12 -- comment id error
+
 STATUS_SUCCESS = 0
 STATUS_OTHER_FAILURE = 1
 STATUS_NO_SEMINAR = 2
@@ -23,6 +27,7 @@ STATUS_CORRUPTED_JSON = 8
 STATUS_PROJECT_ID_ERROR = 9
 STATUS_ALREADY_IN = 10
 STATUS_IS_OWNER = 11
+STATUS_COMMENT_ID_ERROR = 12
 
 class LoginFail(RuntimeError):
     pass
@@ -36,7 +41,7 @@ class PermissionDenied(RuntimeError):
 class SeminarIDError(RuntimeError):
     pass
 
-class SeminarOutDated(RuntimeError):
+class SeminarOutdated(RuntimeError):
     pass
 
 class UserAlreadyIn(RuntimeError):
@@ -98,7 +103,25 @@ def gen_success_response(action, status, id):
 ''' % (action, status, id)
     return response_msg
 
-def build_seminar_view(action, status, id, seminar, members):
+def gen_success_response_comment(action, status, id):
+    response_msg = '''
+{
+    "dir":"response",
+    "content_type":"seminar",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "comment_id":%d
+        }
+    }
+}
+''' % (action, status, id)
+    return response_msg
+
+def build_seminar_view(action, status, id, seminar, members, comments):
     resp = '''\
 {
     "dir":"response",
@@ -114,14 +137,58 @@ def build_seminar_view(action, status, id, seminar, members):
             "owner":"%s",
             "start_date":"%s",
             "end_date":"%s",
-            "member_number_limit":%d,
+            "member_total_need":%d,
             "description":"%s",
+            "create_date":"%s",
+            "modified_date":"%s",
             "current_members":%s
+            "comments":%s
         }
     }
 }''' % (action, status, id, seminar.name, seminar.owner.email,
-        seminar.start_date, seminar.end_date, seminar.member_number_limit,
-        seminar.description, members)
+        timezone.localtime(seminar.start_date), timezone.localtime(seminar.end_date), seminar.member_total_need,
+        seminar.description, timezone.localtime(seminar.create_date), timezone.localtime(seminar.modified_date),
+        members, comments)
+    return resp
+
+def build_seminar_list_view(action, status, seminars):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"seminar",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "seminars":%s,
+            "total_num":%d
+        }
+    }
+}''' % (action, status, repr(seminars[:100]), len(seminars))
+    return resp
+
+def build_comment_view(action, status, id, comment):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"seminar",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "comment_id":%d,
+            "owner":"%s",
+            "create_date":"%s",
+            "modified_date":"%s",
+            "description":"%s"
+        }
+    }
+}''' % (action, status, id, comment.owner.email,
+        timezone.localtime(comment.create_date), timezone.localtime(comment.modified_date), comment.description)
     return resp
 
 def build_search_result(action, status, ids, start, end):
