@@ -86,7 +86,7 @@ user_delete_resp_nonexists = [
     __user_delete_resp_nonexist
 ]
 
-# references
+# wrong pw
 
 __user_delete_req_wrong_password = {
     "dir": "request",
@@ -129,4 +129,92 @@ __user_delete_resp_wrong_password = {
 
 user_delete_resp_wrong_passwords = [
     __user_delete_resp_normal
+]
+
+# missing json field
+
+# missing content.data
+__user_delete_missing_json_field = {
+    "dir": "request",
+    "signature":
+        {
+            "is_user": True,
+            "user_email": "normal0@test.com",
+            "password_hash": "3333"
+        },
+    "content_type": "account",
+    "content":
+        {
+            "action": "delete",
+        }
+}
+
+user_delete_req_missing_json_fields = [
+    __user_delete_missing_json_field
+]
+
+__user_delete_resp_missing_json_field = {
+    "dir": "response",
+    "signature":
+        {
+            "is_user": True,
+            "user_email": "normal0@test.com",
+            "password_hash": "3333"
+        },
+    "content_type": "account",
+    "content":
+        {
+            "action": "delete",
+            "data":
+                {
+                    "status": 3
+                }
+        }
+}
+
+user_delete_resp_missing_json_fields = [
+    __user_delete_resp_missing_json_field
+]
+
+# missing corrupted JSON
+__user_delete_req_corrupted_json = {
+    "dir": "request",
+    "signature":
+        {
+            "is_user": True,
+            "user_email": "normal0@test.com",
+            "password_hash": "3333"
+        },
+    "content_type": "account",
+    "content":
+        {
+            "action": "delete",
+        }
+}
+
+user_delete_req_corrupted_jsons = [
+    __user_delete_req_corrupted_json
+]
+
+__user_delete_resp_corrupted_json = {
+    "dir": "response",
+    "signature":
+        {
+            "is_user": True,
+            "user_email": "normal0@test.com",
+            "password_hash": "3333"
+        },
+    "content_type": "account",
+    "content":
+        {
+            "action": "delete",
+            "data":
+                {
+                    "status": 4
+                }
+        }
+}
+
+user_delete_resp_corrupted_jsons = [
+    __user_delete_resp_corrupted_json
 ]

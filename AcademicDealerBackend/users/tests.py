@@ -188,17 +188,19 @@ class UsersLoginTests(TransactionTestCase):
 #             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
 class UserDeleteTests(TransactionTestCase):
-    def test_normals(self):
-        '''
-        Normal. Should be successful.
-        '''
-
+    def create_user(self):
         for req, expected_resp in \
                 zip(user_register_req_normals, user_register_resp_normals):
             resp = self.client.post(reverse('users:register'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+    def test_normals(self):
+        '''
+        Normal. Should be successful.
+        '''
+        self.create_user()
 
         for req, expected_resp in \
                 zip(user_delete_req_normals, user_delete_resp_normals):
@@ -231,3 +233,15 @@ class UserDeleteTests(TransactionTestCase):
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+    # TODO: bug require fixing:
+    # when fields are not used, missing cannot be detected
+    def test_missing_json_fields(self):
+        self.create_user()
+        for req, expected_resp in \
+                zip(user_delete_req_missing_json_fields, user_delete_resp_missing_json_fields):
+            resp = self.client.post(reverse('users:delete'), req,
+                                    content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
