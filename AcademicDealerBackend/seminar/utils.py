@@ -141,7 +141,7 @@ def build_seminar_view(action, status, id, seminar, members, comments):
             "description":"%s",
             "create_date":"%s",
             "modified_date":"%s",
-            "current_members":%s
+            "current_members":%s,
             "comments":%s
         }
     }
