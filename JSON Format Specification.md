@@ -283,7 +283,7 @@ lab_info = {
   front_page_url = String, -- url format
   pic_url = String,        -- url format, picture of members
   logo_url = String,       -- url format
-  supervisors = [ lab_bio ],
+  supervisors = String,
   comments = String,
   description = String,     -- markdown format
   create_date = String,     -- date format
@@ -567,3 +567,51 @@ status = Number (
                   11 -- comment id error
                 )
 ```
+
+### Generic Search
+
+#### Request
+
+```haskell
+{
+    "dir": "request",
+    "content_type": "search",
+    "content": {
+        "keyword": String, --默认只检索标题是否含关键词
+        "user_email": String, --以email限定指定用户发布的结果
+        "user_type": "owner" | "attender", --这个用户在搜索结果里是参与者还是发布者
+        "search_description": Boolean, --是否检索正文
+        "search_lab": Boolean, --是否检索实验室信息
+        "search_seminar": Boolean,
+        "search_project": Boolean,
+        "search_outdated": Boolean, --是否检索已经过期的project和seminar信息
+        "curr_page": Number, --本次请求的页面号
+    }
+}
+```
+
+#### Response
+
+```haskell
+{
+    "dir": "response",
+    "content_type": "search",
+    "status": Number,
+    "content": {
+        "total_results": Number, -- 搜索结果总数
+        "last_page": Number, -- 搜索结果最后一页的页面号
+        "result": [
+            {
+              "content_type": "lab" | "seminar" | "project",
+              "id": Number 
+            }
+         ]
+    }
+}
+
+status = ( 0 -- success
+				 | 1 -- other error
+				 | 2 -- bad json
+				 )
+```
+
