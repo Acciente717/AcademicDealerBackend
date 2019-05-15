@@ -78,6 +78,59 @@ def api_dispatch(request, url_action):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+def comment_api_dispatch(request, url_action):
+
+    dispatcher = {
+        'create' : comment_create,
+        'edit' : comment_edit,
+        'delete' : comment_delete,
+        'view' : comment_view
+    }
+
+    # return 404 when the url is invalid
+    if url_action not in dispatcher:
+        return HttpResponseNotFound()
+
+    try:
+        # decode JSON
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+        action = decoded['content']['action']
+        if action != 'comment_' + url_action:
+            raise BadJSONType
+
+        # dispatch to the handler
+        http_resp = dispatcher[url_action](request)
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType, KeyError):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    # insufficient priviledge
+    except PermissionDenied:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+
+    # project ID error or missing
+    except (ProjectIDError, ProjectInfo.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
+    # comment ID error or missing
+    except (CommentIDError, ProjectComment.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+
+    # unknown error
+    except Exception as e:
+        print("Error: unknown exception at project comment dispatch!")
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
 def create(request):
     action = 'create'
 
@@ -327,7 +380,7 @@ def search(request):
 
     resp = build_search_result(action, STATUS_SUCCESS, response_ids,
                                 json_content_data['offset'],
-                                json_content_data['length'])
+                                json_content_data['offset'] + json_content_data['length'])
 
     http_resp = HttpResponse(resp)
     return http_resp
@@ -335,206 +388,124 @@ def search(request):
 def comment_create(request):
     action = 'comment_create'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_create')
+    check_request(decoded, 'comment_create')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise ProjectIDError
-        
-        project = ProjectInfo.objects.get(id=json_content_data['id'])
-
-        project.modified_date = timezone.now()
-        project.save()
-
-        project_comment = ProjectComment(
-            project = project,
-            owner = user,
-            create_date = timezone.now(),
-            modified_date = timezone.now(),
-            description = json_content_data['description']
-        )
-        project_comment.save()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except (ProjectIDError, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    if "id" not in json_content_data:
+        raise ProjectIDError
+    
+    project = ProjectInfo.objects.get(id=json_content_data['id'])
 
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    project.modified_date = timezone.now()
+    project.save()
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
+    project_comment = ProjectComment(
+        project = project,
+        owner = user,
+        create_date = timezone.now(),
+        modified_date = timezone.now(),
+        description = json_content_data['description']
+    )
+    project_comment.save()
 
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
     return http_resp
 
 def comment_edit(request):
     action = 'comment_edit'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_edit')
+    check_request(decoded, 'comment_edit')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "comment_id" not in json_content_data:
-            raise CommentIDError
-        
-        project_comment = ProjectComment.objects.get(id=json_content_data['comment_id'])
-
-        if project_comment.owner != user:
-            raise PermissionDenied
-
-        project_comment.modified_date = timezone.now()
-        project_comment.description = json_content_data['description'].replace('\n', '\\n')
-        project_comment.save()
-
-        project.modified_date = timezone.now()
-        project.save()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except (CommentIDError, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+    if "comment_id" not in json_content_data:
+        raise CommentIDError
+    
+    project_comment = ProjectComment.objects.get(id=json_content_data['comment_id'])
 
-    except PermissionDenied:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if project_comment.owner != user:
+        raise PermissionDenied
 
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    project_comment.modified_date = timezone.now()
+    project_comment.description = json_content_data['description'].replace('\n', '\\n')
+    project_comment.save()
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
+    project = project_comment.project
+    project.modified_date = timezone.now()
+    project.save()
 
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
     return http_resp
 
 def comment_delete(request):
     action = 'comment_delete'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_delete')
+    check_request(decoded, 'comment_delete')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "comment_id" not in json_content_data:
-            raise CommentIDError
-        
-        comment_id = json_content_data['comment_id']
-        project_comment = ProjectComment.objects.get(id=comment_id)
-
-        if project_comment.owner != user:
-            raise PermissionDenied
-
-        project_comment.delete()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except (CommentIDError, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+    if "comment_id" not in json_content_data:
+        raise CommentIDError
+    
+    comment_id = json_content_data['comment_id']
+    project_comment = ProjectComment.objects.get(id=comment_id)
 
-    except PermissionDenied:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if project_comment.owner != user:
+        raise PermissionDenied
 
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    project_comment.delete()
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     return http_resp
 
 def comment_view(request):
     action = 'comment_view'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_view')
+    check_request(decoded, 'comment_view')
 
-        json_content_data = decoded['content']['data']
-        
-        if "comment_id" not in json_content_data:
-            raise CommentIDError
-        
-        comment_id = json_content_data['comment_id']
-        project_comment = ProjectComment.objects.get(id=comment_id)
+    json_content_data = decoded['content']['data']
+    
+    if "comment_id" not in json_content_data:
+        raise CommentIDError
+    
+    comment_id = json_content_data['comment_id']
+    project_comment = ProjectComment.objects.get(id=comment_id)
 
-        response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, project_comment)
-        
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+    response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, project_comment)
 
-    except (CommentIDError, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
-
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-    # success
-        http_resp = HttpResponse(response_msg)
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(response_msg)
     return http_resp
