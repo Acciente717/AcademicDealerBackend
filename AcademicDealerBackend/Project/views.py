@@ -10,6 +10,55 @@ def check_request(decoded, action):
     assert_content_type(decoded, 'project')
     assert_action(decoded, action)
 
+def api_dispatch(request):
+
+    dispatcher = {
+        'create' : create,
+        'edit' : edit,
+        'delete' : delete,
+        'view' : view,
+        'join' : join,
+        'drop' : drop,
+        'search' : search
+    }
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+        action = decoded['content']['action']
+        dispatcher[action](request)
+
+    # bad JSON structure or missing field
+    except (json.JSONDecodeError, KeyError):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    # failed to login user
+    except (LoginFail, UserAccount.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+
+    # insufficient priviledge to delete
+    except PermissionDenied:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+
+    # seminar has already finished
+    except SeminarOutDated:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
+
+    # user is already in the participant list
+    except UserAlreadyIn:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_IN))
+
+    # seminar quota is full
+    except SeminarAlreadyFull:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_FULL))
+
+    # seminar ID is wrong or missing
+    except (SeminarIDError, SeminarInfo.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    except Exception as e:
+        print("Error: unknown exception at project dispatch!")
+        print(e)
+
 def create(request):
     action = 'create'
 
