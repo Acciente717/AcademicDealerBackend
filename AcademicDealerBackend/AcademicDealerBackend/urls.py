@@ -8,5 +8,6 @@ urlpatterns = [
     path('project/', include('Project.urls')),
     path('seminar/', include('seminar.urls')),
     path('lab/', include('lab.urls')),
+    path('search/', include('search.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
