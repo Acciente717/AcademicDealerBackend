@@ -25,9 +25,6 @@ STATUS_PROJECT_ID_ERROR = 8
 STATUS_ALREADY_IN = 9
 STATUS_COMMENT_ID_ERROR = 10
 
-class LoginFail(RuntimeError):
-    pass
-
 class BadJSONType(RuntimeError):
     pass
 
