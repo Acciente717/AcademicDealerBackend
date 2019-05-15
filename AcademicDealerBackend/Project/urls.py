@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-# app_name = 'users'
+app_name = 'Project'
 
 urlpatterns = [
     path('<url_action>/', views.api_dispatch, name='api_dispatch'),
