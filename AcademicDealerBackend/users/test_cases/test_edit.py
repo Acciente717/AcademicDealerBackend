@@ -58,10 +58,6 @@ user_edit_resp_normals = [
     __user_edit_resp_normal
 ]
 
-#
-# references
-#
-
 # non-exists
 
 __user_edit_resp_non_exist = {
@@ -89,7 +85,7 @@ user_edit_resp_non_exists = [
 
 # wrong pw
 
-__user_delete_req_wrong_password = {
+__user_edit_req_wrong_password = {
     "dir": "request",
     "signature":
         {
@@ -100,16 +96,31 @@ __user_delete_req_wrong_password = {
     "content_type": "account",
     "content":
         {
-            "action": "delete",
-            "data": {}
+            "action": "edit",
+            "data": {
+                    "real_name": "Donald Trump",
+                    "nick_name": "potato",
+                    "pic_url": "",
+                    "school": "Paradize",
+                    "department": "White House",
+                    "title": "Other",
+                    "enrollment_date": "2000-01-01",
+                    "labs": [],
+                    "projects_create": [],
+                    "projects_attend": [],
+                    "seminars_create": [],
+                    "seminars_attend": [],
+                    "comments": [],
+                    "profile": "#### Profile title\nProfile content\n"
+                }
         }
 }
 
-# user_delete_req_wrong_passwords = [
-#     __user_delete_req_normal
-# ]
+user_edit_req_wrong_passwords = [
+    __user_edit_req_normal
+]
 
-__user_delete_resp_wrong_password = {
+__user_edit_resp_wrong_password = {
     "dir": "response",
     "signature":
         {
@@ -120,7 +131,7 @@ __user_delete_resp_wrong_password = {
     "content_type": "account",
     "content":
         {
-            "action": "delete",
+            "action": "edit",
             "data":
                 {
                     "status": 1
@@ -128,9 +139,9 @@ __user_delete_resp_wrong_password = {
         }
 }
 
-# user_delete_resp_wrong_passwords = [
-#     __user_delete_resp_normal
-# ]
+user_edit_resp_wrong_passwords = [
+    __user_edit_resp_wrong_password
+]
 
 # missing json field
 
