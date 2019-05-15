@@ -2,7 +2,7 @@ from django.utils import timezone
 
 # labinfo status code
 # 0 -- success
-# 1 -- no project
+# 1 -- other failure
 # 2 -- project outdated
 # 3 -- permission deny
 # 4 -- user login fail
@@ -11,11 +11,10 @@ from django.utils import timezone
 # 7 -- json corrupt
 # 8 -- project id error
 # 9 -- user already in the project
-# 10 -- other failure
-# 11 -- comment id error
+# 10 -- comment id error
 
 STATUS_SUCCESS = 0
-STATUS_NO_PROJECT = 1
+STATUS_OTHER_FAILURE = 1
 STATUS_OUTDATED = 2
 STATUS_PERMISSION_DENY = 3
 STATUS_LOGIN_FAIL = 4
@@ -24,8 +23,7 @@ STATUS_NOT_IN = 6
 STATUS_CORRUPTED_JSON = 7
 STATUS_PROJECT_ID_ERROR = 8
 STATUS_ALREADY_IN = 9
-STATUS_OTHER_FAILURE = 10
-STATUS_COMMENT_ID_ERROR = 11
+STATUS_COMMENT_ID_ERROR = 10
 
 class LoginFail(RuntimeError):
     pass
@@ -33,25 +31,25 @@ class LoginFail(RuntimeError):
 class BadJSONType(RuntimeError):
     pass
 
-class PERMISSION_DENY(RuntimeError):
+class PermissionDenied(RuntimeError):
     pass
 
-class PROJECT_ID_ERROR(RuntimeError):
+class ProjectIDError(RuntimeError):
     pass
 
-class COMMENT_ID_ERROR(RuntimeError):
+class CommentIDError(RuntimeError):
     pass
 
-class OUTDATE(RuntimeError):
+class ProjectOutdated(RuntimeError):
     pass
 
-class ALREADY_IN(RuntimeError):
+class UserAlreadyIn(RuntimeError):
     pass
 
-class ALREADY_FULL(RuntimeError):
+class ProjectAlreadyFull(RuntimeError):
     pass
 
-class NOT_IN(RuntimeError):
+class UserNotIn(RuntimeError):
     pass
 
 def assert_dir(dic, val):
