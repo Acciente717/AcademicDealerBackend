@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from .models import ProjectInfo, ProjectMember, UserAccount, ProjectComment
 from django.utils import timezone
@@ -10,638 +10,502 @@ def check_request(decoded, action):
     assert_content_type(decoded, 'project')
     assert_action(decoded, action)
 
-def create(request):
-    action = 'create'
+def api_dispatch(request, url_action):
+
+    dispatcher = {
+        'create' : create,
+        'edit' : edit,
+        'delete' : delete,
+        'view' : view,
+        'join' : join,
+        'drop' : drop,
+        'search' : search,
+        'getall' : getall
+    }
+
+    # return 404 when the url is invalid
+    if url_action not in dispatcher:
+        return HttpResponseNotFound()
 
     try:
+        # decode JSON
         body = str(request.body, encoding='utf8')
         decoded = json.loads(body)
+        action = decoded['content']['action']
+        if action != url_action:
+            raise BadJSONType
 
-        check_request(decoded, 'create')
+        # dispatch to the handler
+        http_resp = dispatcher[action](request)
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
-
-        json_content_data = decoded['content']['data']
-        
-        new_project = ProjectInfo(
-            name = json_content_data['name'],
-            owner = user,
-            start_date = json_content_data['start_date'],
-            end_date = json_content_data['end_date'],
-            create_date = timezone.now(),
-            modified_date = timezone.now(),
-            member_total_need = json_content_data['member_total_need'],
-            description = json_content_data['description'].replace('\n', '\\n')
-        )
-        new_project.save()
-
-        project_member = ProjectMember(
-            project = new_project,
-            person = user,
-        )
-        project_member.save()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
+    # bad JSON structure or missing field
+    except (json.JSONDecodeError, BadJSONType, KeyError):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
 
-    except LoginFail:
+    # failed to login user
+    except (LoginFail, UserAccount.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
 
-    # other unknown exceptions
+    # insufficient priviledge to delete
+    except PermissionDenied:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+
+    # project has already finished
+    except ProjectOutdated:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
+
+    # user is already in the participant list
+    except UserAlreadyIn:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_IN))
+    
+    # user is not in the project participant list
+    except UserNotIn:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_NOT_IN))
+
+    # project quota is full
+    except ProjectAlreadyFull:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_FULL))
+
+    # project ID is wrong or missing
+    except (ProjectIDError, ProjectInfo.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
     except Exception as e:
+        print("Error: unknown exception at project dispatch!")
         print(e)
         http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def comment_api_dispatch(request, url_action):
+
+    dispatcher = {
+        'create' : comment_create,
+        'edit' : comment_edit,
+        'delete' : comment_delete,
+        'view' : comment_view
+    }
+
+    # return 404 when the url is invalid
+    if url_action not in dispatcher:
+        return HttpResponseNotFound()
+
+    try:
+        # decode JSON
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+        action = decoded['content']['action']
+        if action != 'comment_' + url_action:
+            raise BadJSONType
+
+        # dispatch to the handler
+        http_resp = dispatcher[url_action](request)
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType, KeyError):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    # insufficient priviledge
+    except PermissionDenied:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+
+    # invalid user
+    except (LoginFail, UserAccount.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+
+    # project ID error or missing
+    except (ProjectIDError, ProjectInfo.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
+    # comment ID error or missing
+    except (CommentIDError, ProjectComment.DoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+
+    # unknown error
+    except Exception as e:
+        print("Error: unknown exception at project comment dispatch!")
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def create(request):
+    action = 'create'
+
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
+
+    check_request(decoded, 'create')
+
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
+
+    json_content_data = decoded['content']['data']
+    
+    new_project = ProjectInfo(
+        name = json_content_data['name'],
+        owner = user,
+        start_date = json_content_data['start_date'],
+        end_date = json_content_data['end_date'],
+        create_date = timezone.now(),
+        modified_date = timezone.now(),
+        member_total_need = json_content_data['member_total_need'],
+        description = json_content_data['description'].replace('\n', '\\n')
+    )
+    new_project.save()
+
+    project_member = ProjectMember(
+        project = new_project,
+        person = user,
+    )
+    project_member.save()
+
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
     return http_resp
 
 def edit(request):
     action = 'edit'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'edit')
+    check_request(decoded, 'edit')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-        
-        project = ProjectInfo.objects.get(id=json_content_data['id'])
-
-        if project.owner != user:
-            raise PERMISSION_DENY
-
-        project.name = json_content_data['name']
-        project.start_date = json_content_data['start_date']
-        project.end_date = json_content_data['end_date']
-        project.member_total_need = json_content_data['member_total_need']
-        project.description = json_content_data['description'].replace('\n', '\\n')
-        project.modified_date = timezone.now()
-
-        project.save()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if "id" not in json_content_data:
+        raise ProjectIDError
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    project = ProjectInfo.objects.get(id=json_content_data['id'])
 
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    if project.owner != user:
+        raise PermissionDenied
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
+    project.name = json_content_data['name']
+    project.start_date = json_content_data['start_date']
+    project.end_date = json_content_data['end_date']
+    project.member_total_need = json_content_data['member_total_need']
+    project.description = json_content_data['description'].replace('\n', '\\n')
+    project.modified_date = timezone.now()
+    project.save()
 
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
     return http_resp
 
 def delete(request):
     action = 'delete'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'delete')
+    check_request(decoded, 'delete')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-        
-        project_id = json_content_data['id']
-        project = ProjectInfo.objects.get(id=project_id)
-
-        if project.owner != user:
-            raise PERMISSION_DENY
-
-        project.delete()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if "id" not in json_content_data:
+        raise ProjectIDError
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    project_id = json_content_data['id']
+    project = ProjectInfo.objects.get(id=project_id)
 
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    if project.owner != user:
+        raise PermissionDenied
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
+    project.delete()
 
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
     return http_resp
 
 def view(request):
     action = 'view'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'view')
+    check_request(decoded, 'view')
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-        
-        project_id = json_content_data['id']
-        project = ProjectInfo.objects.get(id=project_id)
+    json_content_data = decoded['content']['data']
+    
+    if "id" not in json_content_data:
+        raise ProjectIDError
+    
+    project_id = json_content_data['id']
+    project = ProjectInfo.objects.get(id=project_id)
 
-        members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
-        members = members.replace("'", '"')
-        
-        comments = repr([i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')])
+    members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
+    members = members.replace("'", '"')
+    
+    comments = repr([i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')])
 
-        response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
+    response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
 
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
-
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-    # success
-        http_resp = HttpResponse(response_msg)
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(response_msg)
     return http_resp
 
 def getall(request):
     action = 'getall'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'getall')
+    check_request(decoded, 'getall')
 
-        projects = [i.id for i in ProjectInfo.objects.order_by('modified_date')]
+    projects = [i.id for i in ProjectInfo.objects.order_by('modified_date')]
 
-        response_msg = build_project_list_view(action, STATUS_SUCCESS, projects)
+    response_msg = build_project_list_view(action, STATUS_SUCCESS, projects)
 
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
-
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-    # success
-        http_resp = HttpResponse(response_msg)
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(response_msg)
     return http_resp
 
 def join(request):
     action = 'join'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'join')
+    check_request(decoded, 'join')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-        
-        project_id = json_content_data['id']
-        project = ProjectInfo.objects.get(id=project_id)
-
-        if timezone.now() > project.end_date:
-            raise OUTDATE
-        
-        members = [i.person for i in ProjectMember.objects.filter(project=project)]
-
-        if user in members:
-            raise ALREADY_IN
-        
-        project_member = ProjectMember(
-            project = project,
-            person = user,
-        )
-        project_member.save()
-        
-        if len(members) >= project.member_total_need:
-            raise ALREADY_FULL
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if "id" not in json_content_data:
+        raise ProjectIDError
     
-    except OUTDATE:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
+    project_id = json_content_data['id']
+    project = ProjectInfo.objects.get(id=project_id)
+
+    if timezone.now() > project.end_date:
+        raise ProjectOutdated
     
-    except ALREADY_IN:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_IN))
+    members = [i.person for i in ProjectMember.objects.filter(project=project)]
+
+    if user in members:
+        raise UserAlreadyIn
     
-    except ALREADY_FULL:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_FULL))
+    project_member = ProjectMember(
+        project = project,
+        person = user,
+    )
+    project_member.save()
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    if len(members) >= project.member_total_need:
+        raise ProjectAlreadyFull
 
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
-
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
     return http_resp
 
 def drop(request):
     action = 'drop'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'drop')
+    check_request(decoded, 'drop')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-        
-        project_id = json_content_data['id']
-        project = ProjectInfo.objects.get(id=project_id)
-
-        if timezone.now() > project.end_date:
-            raise OUTDATE
-        
-        members = [i.person for i in ProjectMember.objects.filter(project=project)]
-
-        if user not in members:
-            raise NOT_IN
-        
-        project_member = ProjectMember.objects.get(
-            project = project,
-            person = user,
-        )
-        project_member.delete()
-        
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if "id" not in json_content_data:
+        raise ProjectIDError
     
-    except OUTDATE:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OUTDATED))
+    project_id = json_content_data['id']
+    project = ProjectInfo.objects.get(id=project_id)
+
+    if timezone.now() > project.end_date:
+        raise ProjectOutdated
     
-    except NOT_IN:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_NOT_IN))
+    members = [i.person for i in ProjectMember.objects.filter(project=project)]
+
+    if user not in members:
+        raise UserNotIn
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
-
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
-
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    project_member = ProjectMember.objects.get(
+        project = project,
+        person = user,
+    )
+    project_member.delete()
+    
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
     return http_resp
 
 def search(request):
     action = 'search'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, action)
+    check_request(decoded, action)
 
-        json_content_data = decoded['content']['data']
+    json_content_data = decoded['content']['data']
 
-        query_sets = []
-        for keyword in json_content_data['keywords']:
-            query_sets.append(ProjectInfo.objects.filter(name__contains=keyword))
-        query_sets = [set(i) for i in query_sets]
-        intersected_query_result = set.intersection(*query_sets)
-        
-        response_ids = [i.id for i in intersected_query_result]
-
-        resp = build_search_result(action, STATUS_SUCCESS, response_ids,
-                                   json_content_data['offset'],
-                                   json_content_data['length'])
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    # other unknown exceptions
-    except Exception as e:
-        print(e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-        http_resp = HttpResponse(resp)
+    query_sets = []
+    for keyword in json_content_data['keywords']:
+        query_sets.append(ProjectInfo.objects.filter(name__contains=keyword))
+    query_sets = [set(i) for i in query_sets]
+    intersected_query_result = set.intersection(*query_sets)
     
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    response_ids = [i.id for i in intersected_query_result]
+
+    resp = build_search_result(action, STATUS_SUCCESS, response_ids,
+                                json_content_data['offset'],
+                                json_content_data['offset'] + json_content_data['length'])
+
+    http_resp = HttpResponse(resp)
     return http_resp
 
 def comment_create(request):
     action = 'comment_create'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_create')
+    check_request(decoded, 'comment_create')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "id" not in json_content_data:
-            raise PROJECT_ID_ERROR
-        
-        project = ProjectInfo.objects.get(id=json_content_data['id'])
-
-        project.modified_date = timezone.now()
-        project.save()
-
-        project_comment = ProjectComment(
-            project = project,
-            owner = user,
-            create_date = timezone.now(),
-            modified_date = timezone.now(),
-            description = json_content_data['description']
-        )
-        project_comment.save()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    if "id" not in json_content_data:
+        raise ProjectIDError
+    
+    project = ProjectInfo.objects.get(id=json_content_data['id'])
 
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    project.modified_date = timezone.now()
+    project.save()
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
+    project_comment = ProjectComment(
+        project = project,
+        owner = user,
+        create_date = timezone.now(),
+        modified_date = timezone.now(),
+        description = json_content_data['description']
+    )
+    project_comment.save()
 
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
     return http_resp
 
 def comment_edit(request):
     action = 'comment_edit'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_edit')
+    check_request(decoded, 'comment_edit')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "comment_id" not in json_content_data:
-            raise COMMENT_ID_ERROR
-        
-        project_comment = ProjectComment.objects.get(id=json_content_data['comment_id'])
-
-        if project_comment.owner != user:
-            raise PERMISSION_DENY
-
-        project_comment.modified_date = timezone.now()
-        project_comment.description = json_content_data['description'].replace('\n', '\\n')
-        project_comment.save()
-
-        project = project_comment.project
-        project.modified_date = timezone.now()
-        project.save()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except (COMMENT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+    if "comment_id" not in json_content_data:
+        raise CommentIDError
+    
+    project_comment = ProjectComment.objects.get(id=json_content_data['comment_id'])
 
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if project_comment.owner != user:
+        raise PermissionDenied
 
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    project_comment.modified_date = timezone.now()
+    project_comment.description = json_content_data['description'].replace('\n', '\\n')
+    project_comment.save()
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
+    project = project_comment.project
+    project.modified_date = timezone.now()
+    project.save()
 
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
     return http_resp
 
 def comment_delete(request):
     action = 'comment_delete'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_delete')
+    check_request(decoded, 'comment_delete')
 
-        json_signature = decoded['signature']
-        if json_signature['is_user'] != True:
-            raise LoginFail
-        user = UserAccount.objects.get(email=json_signature['user_email'])
-        if user.pw_hash != json_signature['password_hash']:
-            raise LoginFail
+    json_signature = decoded['signature']
+    if json_signature['is_user'] != True:
+        raise LoginFail
+    user = UserAccount.objects.get(email=json_signature['user_email'])
+    if user.pw_hash != json_signature['password_hash']:
+        raise LoginFail
 
-        json_content_data = decoded['content']['data']
-        
-        if "comment_id" not in json_content_data:
-            raise COMMENT_ID_ERROR
-        
-        comment_id = json_content_data['comment_id']
-        project_comment = ProjectComment.objects.get(id=comment_id)
-
-        if project_comment.owner != user:
-            raise PERMISSION_DENY
-
-        project_comment.delete()
-
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
-
-    except LoginFail:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_LOGIN_FAIL))
+    json_content_data = decoded['content']['data']
     
-    except (COMMENT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
+    if "comment_id" not in json_content_data:
+        raise CommentIDError
+    
+    comment_id = json_content_data['comment_id']
+    project_comment = ProjectComment.objects.get(id=comment_id)
 
-    except PERMISSION_DENY:
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_PERMISSION_DENY))
+    if project_comment.owner != user:
+        raise PermissionDenied
 
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+    project_comment.delete()
 
-    else:
-    # success
-        http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     return http_resp
 
 def comment_view(request):
     action = 'comment_view'
 
-    try:
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
+    body = str(request.body, encoding='utf8')
+    decoded = json.loads(body)
 
-        check_request(decoded, 'comment_view')
+    check_request(decoded, 'comment_view')
 
-        json_content_data = decoded['content']['data']
-        
-        if "comment_id" not in json_content_data:
-            raise COMMENT_ID_ERROR
-        
-        comment_id = json_content_data['comment_id']
-        project_comment = ProjectComment.objects.get(id=comment_id)
+    json_content_data = decoded['content']['data']
+    
+    if "comment_id" not in json_content_data:
+        raise CommentIDError
+    
+    comment_id = json_content_data['comment_id']
+    project_comment = ProjectComment.objects.get(id=comment_id)
 
-        response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, project_comment)
-        
-    # bad JSON format
-    except (json.JSONDecodeError, BadJSONType):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+    response_msg = build_comment_view(action, STATUS_SUCCESS, comment_id, project_comment)
 
-    except (COMMENT_ID_ERROR, ObjectDoesNotExist):
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_COMMENT_ID_ERROR))
-
-    # other unknown exceptions
-    except Exception as e:
-        print("error", e)
-        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
-
-    else:
-    # success
-        http_resp = HttpResponse(response_msg)
-
-    http_resp["Access-Control-Allow-Origin"] = "*"
+    http_resp = HttpResponse(response_msg)
     return http_resp
