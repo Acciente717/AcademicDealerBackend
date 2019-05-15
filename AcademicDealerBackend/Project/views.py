@@ -33,6 +33,8 @@ def create(request):
             owner = user,
             start_date = json_content_data['start_date'],
             end_date = json_content_data['end_date'],
+            create_date = timezone.now(),
+            modified_date = timezone.now(),
             member_total_need = json_content_data['member_total_need'],
             description = json_content_data['description'].replace('\n', '\\n')
         )
@@ -94,6 +96,7 @@ def edit(request):
         project.end_date = json_content_data['end_date']
         project.member_total_need = json_content_data['member_total_need']
         project.description = json_content_data['description'].replace('\n', '\\n')
+        project.modified_date = timezone.now()
 
         project.save()
 
@@ -427,6 +430,9 @@ def comment_create(request):
         
         project = ProjectInfo.objects.get(id=json_content_data['id'])
 
+        project.modified_date = timezone.now()
+        project.save()
+
         project_comment = ProjectComment(
             project = project,
             owner = user,
@@ -487,6 +493,9 @@ def comment_edit(request):
         project_comment.modified_date = timezone.now()
         project_comment.description = json_content_data['description'].replace('\n', '\\n')
         project_comment.save()
+
+        project.modified_date = timezone.now()
+        project.save()
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):

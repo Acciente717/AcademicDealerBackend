@@ -137,13 +137,15 @@ def build_project_view(action, status, id, project, members, comments):
             "end_date":"%s",
             "member_total_need":%d,
             "description":"%s",
+            "create_date":"%s",
+            "modified_date":"%s",
             "current_members":%s
             "comments":%s
         }
     }
 }''' % (action, status, id, project.name, project.owner.email,
         timezone.localtime(project.start_date), timezone.localtime(project.end_date), project.member_total_need,
-        project.description, members, comments)
+        project.description, timezone.localtime(project.create_date), timezone.localtime(project.modified_date), members, comments)
     return resp
 
 def build_comment_view(action, status, id, comment):

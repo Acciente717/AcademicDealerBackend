@@ -6,6 +6,8 @@ class ProjectInfo(models.Model):
     owner = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+    create_date = models.DateTimeField()
+    modified_date = models.DateTimeField()
     member_total_need = models.PositiveIntegerField()
     description = models.TextField()
 
