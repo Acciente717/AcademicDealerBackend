@@ -195,8 +195,11 @@ def view(request):
 
         members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
         members = members.replace("'", '"')
+        
+        comments = repr([i.id for i in Comment.objects.filter(project=project)])
+        comments = comments.replace("'", '"')
 
-        response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members)
+        response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):

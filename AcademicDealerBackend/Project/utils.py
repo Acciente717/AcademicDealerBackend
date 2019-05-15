@@ -119,7 +119,7 @@ def gen_success_response_comment(action, status, id):
 ''' % (action, status, id)
     return response_msg
 
-def build_project_view(action, status, id, project, members):
+def build_project_view(action, status, id, project, members, comments):
     resp = '''\
 {
     "dir":"response",
@@ -138,11 +138,12 @@ def build_project_view(action, status, id, project, members):
             "member_total_need":%d,
             "description":"%s",
             "current_members":%s
+            "comments":%s
         }
     }
 }''' % (action, status, id, project.name, project.owner.email,
         timezone.localtime(project.start_date), timezone.localtime(project.end_date), project.member_total_need,
-        project.description, members)
+        project.description, members, comments)
     return resp
 
 def build_comment_view(action, status, id, comment):
