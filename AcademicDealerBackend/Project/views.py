@@ -200,9 +200,40 @@ def view(request):
         members = members.replace("'", '"')
         
         comments = repr([i.id for i in ProjectComment.objects.filter(project=project)])
-        comments = comments.replace("'", '"')
 
         response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
+
+    # bad JSON format
+    except (json.JSONDecodeError, BadJSONType):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_CORRUPTED_JSON))
+
+    except (PROJECT_ID_ERROR, ObjectDoesNotExist):
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
+
+    else:
+    # success
+        http_resp = HttpResponse(response_msg)
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
+
+def getall(request):
+    action = 'getall'
+
+    try:
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        check_request(decoded, 'getall')
+
+        projects = [i.id for i in ProjectInfo.objects.order_by('create_date')]
+
+        response_msg = build_project_list_view(action, STATUS_SUCCESS, projects)
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType):

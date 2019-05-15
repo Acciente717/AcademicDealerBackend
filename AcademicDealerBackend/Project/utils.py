@@ -148,6 +148,24 @@ def build_project_view(action, status, id, project, members, comments):
         project.description, timezone.localtime(project.create_date), timezone.localtime(project.modified_date), members, comments)
     return resp
 
+def build_project_list_view(action, status, projects):
+    resp = '''\
+{
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":"%s",
+        "data":
+        {
+            "status":%d,
+            "projects":%s,
+            "total_num":%d
+        }
+    }
+}''' % (action, status, repr(projects[:100]), len(projects))
+    return resp
+
 def build_comment_view(action, status, id, comment):
     resp = '''\
 {
@@ -182,7 +200,7 @@ def build_search_result(action, status, ids, start, len):
         {
             "status":%s,
             "ids":%s,
-            "total_num":%s
+            "total_num":%d
         }
     }
 }''' % (action, status, repr(ids[start:start + len]), len(ids))
