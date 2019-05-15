@@ -18,8 +18,8 @@
     "content_type": "search",
     "content": {
         "keyword": String, //默认只检索标题是否含关键词
-        "owner_email": String, //以email限定指定用户发布的结果
-        "attender_email": String, //以email限定指定用户参与的结果
+        "user_email": String, //以email限定指定用户发布的结果
+        "user_type": "owner" | "attender", //这个用户在搜索结果里是参与者还是发布者
         "search_description": Boolean, //是否检索正文
         "search_lab": Boolean, //是否检索实验室信息
         "search_seminar": Boolean,
