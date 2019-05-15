@@ -146,7 +146,7 @@ user_edit_resp_wrong_passwords = [
 # missing json field
 
 # missing content.data
-__user_delete_missing_json_field = {
+__user_edit_missing_json_field = {
     "dir": "request",
     "signature":
         {
@@ -157,15 +157,15 @@ __user_delete_missing_json_field = {
     "content_type": "account",
     "content":
         {
-            "action": "delete",
+            "action": "edit",
         }
 }
 
-user_delete_req_missing_json_fields = [
-    __user_delete_missing_json_field
+user_edit_req_missing_json_fields = [
+    __user_edit_missing_json_field
 ]
 
-__user_delete_resp_missing_json_field = {
+__user_edit_resp_missing_json_field = {
     "dir": "response",
     "signature":
         {
@@ -176,16 +176,16 @@ __user_delete_resp_missing_json_field = {
     "content_type": "account",
     "content":
         {
-            "action": "delete",
+            "action": "edit",
             "data":
                 {
-                    "status": 3
+                    "status": 4
                 }
         }
 }
 
-user_delete_resp_missing_json_fields = [
-    __user_delete_resp_missing_json_field
+user_edit_resp_missing_json_fields = [
+    __user_edit_resp_missing_json_field
 ]
 
 # missing corrupted JSON
