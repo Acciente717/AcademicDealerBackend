@@ -525,6 +525,7 @@ def comment_edit(request):
         project_comment.description = json_content_data['description'].replace('\n', '\\n')
         project_comment.save()
 
+        project = project_comment.project
         project.modified_date = timezone.now()
         project.save()
 
