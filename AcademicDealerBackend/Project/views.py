@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from .models import ProjectInfo, ProjectMember, UserAccount, ProjectComment
 from django.utils import timezone
@@ -10,7 +10,7 @@ def check_request(decoded, action):
     assert_content_type(decoded, 'project')
     assert_action(decoded, action)
 
-def api_dispatch(request):
+def api_dispatch(request, url_action):
 
     dispatcher = {
         'create' : create,
@@ -23,11 +23,19 @@ def api_dispatch(request):
         'getall' : getall
     }
 
+    # return 404 when the url is invalid
+    if url_action not in dispatcher:
+        return HttpResponseNotFound()
+
     try:
+        # decode JSON
         body = str(request.body, encoding='utf8')
         decoded = json.loads(body)
         action = decoded['content']['action']
+        if action != url_action:
+            raise BadJSONType
 
+        # dispatch to the handler
         http_resp = dispatcher[action](request)
 
     # bad JSON structure or missing field
@@ -65,6 +73,7 @@ def api_dispatch(request):
     except Exception as e:
         print("Error: unknown exception at project dispatch!")
         print(e)
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_OTHER_FAILURE))
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
