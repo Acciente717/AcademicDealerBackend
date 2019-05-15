@@ -168,7 +168,7 @@ def build_comment_view(action, status, id, comment):
         timezone.localtime(comment.create_date), timezone.localtime(comment.modified_date), comment.description)
     return resp
 
-def build_search_result(action, status, ids, start, end):
+def build_search_result(action, status, ids, start, len):
     resp = '''\
 {
     "dir":"response",
@@ -183,5 +183,5 @@ def build_search_result(action, status, ids, start, end):
             "total_num":%s
         }
     }
-}''' % (action, status, repr(ids[start:end]), len(ids))
+}''' % (action, status, repr(ids[start:start + len]), len(ids))
     return resp
