@@ -58,31 +58,13 @@ user_edit_resp_normals = [
     __user_edit_resp_normal
 ]
 
+#
 # references
+#
 
-# non exists
+# non-exists
 
-__user_delete_req_nonexist = {
-    "dir": "request",
-    "signature":
-        {
-            "is_user": True,
-            "user_email": "normal0@test.com",
-            "password_hash": "3333"
-        },
-    "content_type": "account",
-    "content":
-        {
-            "action": "delete",
-            "data": {}
-        }
-}
-
-user_delete_req_nonexists = [
-    __user_delete_req_nonexist
-]
-
-__user_delete_resp_nonexist = {
+__user_edit_resp_non_exist = {
     "dir": "response",
     "signature":
         {
@@ -93,7 +75,7 @@ __user_delete_resp_nonexist = {
     "content_type": "account",
     "content":
         {
-            "action": "delete",
+            "action": "edit",
             "data":
                 {
                     "status": 2
@@ -101,8 +83,8 @@ __user_delete_resp_nonexist = {
         }
 }
 
-user_delete_resp_nonexists = [
-    __user_delete_resp_nonexist
+user_edit_resp_non_exists = [
+    __user_edit_resp_non_exist
 ]
 
 # wrong pw
