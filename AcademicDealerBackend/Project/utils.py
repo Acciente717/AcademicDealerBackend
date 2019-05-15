@@ -12,6 +12,7 @@ from django.utils import timezone
 # 8 -- project id error
 # 9 -- user already in the project
 # 10 -- comment id error
+# 11 -- owner is trying to drop out of project
 
 STATUS_SUCCESS = 0
 STATUS_OTHER_FAILURE = 1
@@ -24,6 +25,7 @@ STATUS_CORRUPTED_JSON = 7
 STATUS_PROJECT_ID_ERROR = 8
 STATUS_ALREADY_IN = 9
 STATUS_COMMENT_ID_ERROR = 10
+STATUS_IS_OWNER = 11
 
 class BadJSONType(RuntimeError):
     pass
@@ -47,6 +49,9 @@ class ProjectAlreadyFull(RuntimeError):
     pass
 
 class UserNotIn(RuntimeError):
+    pass
+
+class UserIsOwner(RuntimeError):
     pass
 
 def assert_dir(dic, val):

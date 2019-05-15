@@ -69,6 +69,10 @@ def api_dispatch(request, url_action):
     # project ID is wrong or missing
     except (ProjectIDError, ProjectInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
+    
+    # project owner is trying to drop out
+    except UserIsOwner:
+        http_resp = HttpResponse(gen_fail_response(action, STATUS_IS_OWNER))
 
     except Exception as e:
         print("Error: unknown exception at project dispatch!")
@@ -330,6 +334,9 @@ def drop(request):
 
     if user not in members:
         raise UserNotIn
+    
+    if user == project.owner:
+        raise UserIsOwner
     
     project_member = ProjectMember.objects.get(
         project = project,
