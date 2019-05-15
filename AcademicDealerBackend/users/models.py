@@ -1,6 +1,9 @@
 from django.db import models
 import datetime
 
+class LoginFail(RuntimeError):
+    pass
+
 class UserAccount(models.Model):
     email = models.EmailField(max_length=254, unique=True) # 254 is correct
     pw_hash = models.CharField(max_length=255)
@@ -15,3 +18,12 @@ class UserAccount(models.Model):
     title = models.CharField(max_length=255)
     enrollment_date = models.DateField()
     profile = models.TextField()
+
+    @classmethod
+    def login(self, signature):
+        if signature['is_user'] != True:
+            raise LoginFail
+        user = UserAccount.objects.get(email=signature['user_email'])
+        if user.pw_hash != signature['password_hash']:
+            raise LoginFail
+        return user

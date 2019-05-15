@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
-from .models import ProjectInfo, ProjectMember, UserAccount, ProjectComment
+from .models import ProjectInfo, ProjectMember, UserAccount, ProjectComment, LoginFail
 from django.utils import timezone
 import json
 from .utils import *
@@ -140,11 +140,7 @@ def create(request):
     check_request(decoded, 'create')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -178,11 +174,7 @@ def edit(request):
     check_request(decoded, 'edit')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -214,11 +206,7 @@ def delete(request):
     check_request(decoded, 'delete')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -286,11 +274,7 @@ def join(request):
     check_request(decoded, 'join')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -329,11 +313,7 @@ def drop(request):
     check_request(decoded, 'drop')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -394,11 +374,7 @@ def comment_create(request):
     check_request(decoded, 'comment_create')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -431,11 +407,7 @@ def comment_edit(request):
     check_request(decoded, 'comment_edit')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     
@@ -467,11 +439,7 @@ def comment_delete(request):
     check_request(decoded, 'comment_delete')
 
     json_signature = decoded['signature']
-    if json_signature['is_user'] != True:
-        raise LoginFail
-    user = UserAccount.objects.get(email=json_signature['user_email'])
-    if user.pw_hash != json_signature['password_hash']:
-        raise LoginFail
+    user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
     

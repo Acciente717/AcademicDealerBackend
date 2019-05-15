@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import UserAccount
+from users.models import UserAccount, LoginFail
 
 class ProjectInfo(models.Model):
     name = models.CharField(max_length=255)
