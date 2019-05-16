@@ -139,7 +139,7 @@ def create(request):
         supervisors = json_content_data['supervisors'],
         create_date = timezone.now(),
         modified_date = timezone.now(),
-        description = json_content_data['description'].replace('\n', '\\n')
+        description = json_content_data['description']
     )
     new_lab.save()
 
@@ -178,7 +178,7 @@ def edit(request):
     lab.logo_url = json_content_data['logo_url'],
     lab.supervisors = json_content_data['supervisors'],
     lab.modified_date = timezone.now(),
-    lab.description = json_content_data['description'].replace('\n', '\\n')
+    lab.description = json_content_data['description']
     lab.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, lab.id))
@@ -227,7 +227,7 @@ def view(request):
     lab_id = json_content_data['id']
     lab = LabInfo.objects.get(id=lab_id)
     
-    comments = repr([i.id for i in LabComment.objects.filter(lab=lab).order_by('modified_date')])
+    comments = [i.id for i in LabComment.objects.filter(lab=lab).order_by('modified_date')]
 
     response_msg = build_lab_view(action, STATUS_SUCCESS, lab_id, lab, comments)
 
@@ -269,7 +269,7 @@ def search(request):
 
     resp = build_search_result(action, STATUS_SUCCESS, response_ids,
                                 json_content_data['offset'],
-                                json_content_data['offset'] + json_content_data['length'])
+                                json_content_data['length'])
 
     http_resp = HttpResponse(resp)
     return http_resp
@@ -329,7 +329,7 @@ def comment_edit(request):
         raise PermissionDenied
 
     lab_comment.modified_date = timezone.now()
-    lab_comment.description = json_content_data['description'].replace('\n', '\\n')
+    lab_comment.description = json_content_data['description']
     lab_comment.save()
 
     lab = lab_comment.lab
