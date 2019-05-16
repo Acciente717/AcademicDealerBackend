@@ -1,4 +1,5 @@
 from django.utils import timezone
+import json
 
 # labinfo status code
 # 0 -- success
@@ -119,7 +120,7 @@ def gen_success_response_comment(action, status, id):
 ''' % (action, status, id)
     return response_msg
 
-def build_project_view(action, status, id, project, members, comments):
+def build_project_view_old(action, status, id, project, members, comments):
     resp = '''\
 {
     "dir":"response",
@@ -147,6 +148,32 @@ def build_project_view(action, status, id, project, members, comments):
         timezone.localtime(project.start_date), timezone.localtime(project.end_date), project.member_total_need,
         project.description, timezone.localtime(project.create_date), timezone.localtime(project.modified_date), members, comments)
     return resp
+
+def build_project_view(action, status, id, project, members, comments):
+    resp = {
+    "dir":"response",
+    "content_type":"project",
+    "content":
+    {
+        "action":action,
+        "data":
+        {
+            "status":status,
+            "id":id,
+            "name":project.name,
+            "owner":project.owner.email,
+            "start_date":str(timezone.localtime(project.start_date)),
+            "end_date":str(timezone.localtime(project.end_date)),
+            "member_total_need":project.member_total_need,
+            "description":project.description,
+            "create_date":str(timezone.localtime(project.create_date)),
+            "modified_date":str(timezone.localtime(project.modified_date)),
+            "current_members":members,
+            "comments":str(comments)
+        }
+    }
+}
+    return json.dumps(resp)
 
 def build_project_list_view(action, status, projects):
     resp = '''\
