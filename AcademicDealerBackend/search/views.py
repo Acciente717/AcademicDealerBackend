@@ -197,10 +197,6 @@ def search_owned_lab(keywords, owner_email, search_description, search_outdated)
     for keyword in keywords:
         title_result = title_result.filter(name__contains=keyword)
 
-    # exclude outdated if required
-    if not search_outdated:
-        title_result = title_result.filter(end_date__gte=timezone.now())
-
     ### search the description of projcet if needed
     if search_description:
 
