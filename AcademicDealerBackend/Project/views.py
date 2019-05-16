@@ -428,7 +428,7 @@ def comment_edit(request):
         raise PermissionDenied
 
     project_comment.modified_date = timezone.now()
-    project_comment.description = json_content_data['description'].replace('\n', '\\n')
+    project_comment.description = json_content_data['description']
     project_comment.save()
 
     project = project_comment.project
