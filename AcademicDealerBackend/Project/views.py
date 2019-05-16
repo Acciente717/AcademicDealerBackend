@@ -23,6 +23,8 @@ def api_dispatch(request, url_action):
         'getall' : getall
     }
 
+    action = "unknown action"
+    
     # return 404 when the url is invalid
     if url_action not in dispatcher:
         return HttpResponseNotFound()

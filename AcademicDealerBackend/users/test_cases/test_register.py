@@ -408,6 +408,11 @@ __user_register_resp_bad_req_type_any = {
         }
 }
 
+# also used in test apart from register.
+# Please do NOT change without correcting all related behaviors!
+# also used in test apart from register.
+# Please do NOT change without correcting all related behaviors!
+
 user_register_req_normals = [
     __user_register_req_normal0,
     __user_register_req_normal1
