@@ -15,12 +15,11 @@ STATUS_CORRUPTED_JSON = 2
 class BadJSONType(RuntimeError):
     pass
 
-def search_owned_something(info_class, keywords, owner_email,
-                           search_description, search_outdated):
+def search_owned_project(keywords, owner_email, search_description, search_outdated):
 
     ### search title
     keywords = keywords.split(' ')
-    title_result = info_class.objects.all()
+    title_result = ProjectInfo.objects.all()
 
     # apply owner_email restriction
     if owner_email:
@@ -38,7 +37,7 @@ def search_owned_something(info_class, keywords, owner_email,
     if search_description:
 
         # apply owner_email restriction
-        description_result = info_class.objects.all()
+        description_result = ProjectInfo.objects.all()
         if owner_email:
             description_result = description_result.filter(owner__email=owner_email)
 
@@ -58,12 +57,11 @@ def search_owned_something(info_class, keywords, owner_email,
              "date" : timezone.localtime(i.modified_date) } for i in title_result]
     return lst
 
-def search_attended_something(member_class, keywords, attender_email,
-                              search_description, search_outdated):
+def search_attended_project(keywords, attender_email, search_description, search_outdated):
 
     ### search title
     keywords = keywords.split(' ')
-    title_result = member_class.objects.all()
+    title_result = ProjectMember.objects.all()
 
     # apply attender email restriction
     if attender_email:
@@ -81,7 +79,7 @@ def search_attended_something(member_class, keywords, attender_email,
     if search_description:
 
         # apply owner_email restriction
-        description_result = member_class.objects.all()
+        description_result = ProjectMember.objects.all()
         if attender_email:
             description_result = description_result.filter(person__email=attender_email)
 
@@ -99,6 +97,132 @@ def search_attended_something(member_class, keywords, attender_email,
     lst = [ {"content_type" : "project",
               "id" : i.project.id,
               "date" : timezone.localtime(i.project.modified_date) } for i in title_result]
+    return lst
+
+def search_owned_seminar(keywords, owner_email, search_description, search_outdated):
+
+    ### search title
+    keywords = keywords.split(' ')
+    title_result = SeminarInfo.objects.all()
+
+    # apply owner_email restriction
+    if owner_email:
+        title_result = title_result.filter(owner__email=owner_email)
+
+    # apply keyword restriction
+    for keyword in keywords:
+        title_result = title_result.filter(name__contains=keyword)
+
+    # exclude outdated if required
+    if not search_outdated:
+        title_result = title_result.filter(end_date__gte=timezone.now())
+
+    ### search the description of projcet if needed
+    if search_description:
+
+        # apply owner_email restriction
+        description_result = SeminarInfo.objects.all()
+        if owner_email:
+            description_result = description_result.filter(owner__email=owner_email)
+
+        # apply keyword restriction
+        for keyword in keywords:
+            description_result = description_result.filter(description__contains=keyword)
+
+        # exclude outdated if required
+        if not search_outdated:
+            description_result = description_result.filter(end_date__gte=timezone.now())
+
+        # union with previous result
+        title_result = title_result.union(description_result)
+
+    lst = [ {"content_type" : "seminar",
+             "id" : i.id,
+             "date" : timezone.localtime(i.modified_date) } for i in title_result]
+    return lst
+
+def search_attended_seminar(keywords, attender_email, search_description, search_outdated):
+
+    ### search title
+    keywords = keywords.split(' ')
+    title_result = SeminarMember.objects.all()
+
+    # apply attender email restriction
+    if attender_email:
+        title_result = title_result.filter(person__email=attender_email)
+
+    # apply keyword restriction
+    for keyword in keywords:
+        title_result = title_result.filter(seminar__name__contains=keyword)
+
+    # exclude outdated if required
+    if not search_outdated:
+        title_result = title_result.filter(seminar__end_date__gte=timezone.now())
+
+    ### search the description of projcet if needed
+    if search_description:
+
+        # apply owner_email restriction
+        description_result = SeminarMember.objects.all()
+        if attender_email:
+            description_result = description_result.filter(person__email=attender_email)
+
+        # apply keyword restriction
+        for keyword in keywords:
+            description_result = description_result.filter(seminar__description__contains=keyword)
+
+        # exclude outdated if required
+        if not search_outdated:
+            description_result = description_result.filter(seminar__end_date__gte=timezone.now())
+
+        # union with previous result
+        title_result = title_result.union(description_result)
+
+    lst = [ {"content_type" : "seminar",
+              "id" : i.seminar.id,
+              "date" : timezone.localtime(i.seminar.modified_date) } for i in title_result]
+    return lst
+
+def search_owned_lab(keywords, owner_email, search_description, search_outdated):
+
+    ### search title
+    keywords = keywords.split(' ')
+    title_result = LabInfo.objects.all()
+
+    # apply owner_email restriction
+    if owner_email:
+        title_result = title_result.filter(owner__email=owner_email)
+
+    # apply keyword restriction
+    for keyword in keywords:
+        title_result = title_result.filter(name__contains=keyword)
+
+    # exclude outdated if required
+    if not search_outdated:
+        title_result = title_result.filter(end_date__gte=timezone.now())
+
+    ### search the description of projcet if needed
+    if search_description:
+
+        # apply owner_email restriction
+        description_result = LabInfo.objects.all()
+        if owner_email:
+            description_result = description_result.filter(owner__email=owner_email)
+
+        # apply keyword restriction
+        for keyword in keywords:
+            description_result = description_result.filter(description__contains=keyword)
+
+        # exclude outdated if required
+        if not search_outdated:
+            description_result = description_result.filter(end_date__gte=timezone.now())
+
+        # union with previous result
+        title_result = title_result.union(description_result)
+
+    lst = [ {"content_type" : "lab",
+             "id" : i.id,
+             "date" : timezone.localtime(i.modified_date) } for i in title_result]
     return lst
 
 def build_search_result(total_results, total_page_num, result_list):
@@ -145,17 +269,17 @@ def api(request):
         if json_content_data['user_type'] == 'owner':
 
             # search for owned projects
-            projects = search_owned_something(ProjectInfo, keywords, email,
+            projects = search_owned_project(keywords, email,
                                             search_description, search_outdated)\
                 if search_project else []
 
             # search for owned labs
-            labs = search_owned_something(LabInfo, keywords, email,
-                                        search_description, search_outdated)\
+            labs = search_owned_lab(keywords, email,
+                                    search_description, search_outdated)\
                 if search_lab else []
 
             # search for seminars
-            seminars = search_owned_something(SeminarInfo, keywords, email,
+            seminars = search_owned_seminar(keywords, email,
                                             search_description, search_outdated)\
                 if search_seminar else []
 
@@ -163,16 +287,16 @@ def api(request):
         elif json_content_data['user_type'] == 'attender':
 
             # search for attended projects
-            projects = search_attended_something(ProjectMember, keywords, email,
-                                                search_description, search_outdated)\
+            projects = search_attended_project(keywords, email,
+                                               search_description, search_outdated)\
                 if search_project else []
 
             # no lab can be attended
             labs = []
 
             # search for attended seminars
-            seminars = search_attended_something(SeminarMember, keywords, email,
-                                                search_description, search_outdated)\
+            seminars = search_attended_seminar(keywords, email,
+                                               search_description, search_outdated)\
                 if search_seminar else []
         else:
             raise BadJSONType
