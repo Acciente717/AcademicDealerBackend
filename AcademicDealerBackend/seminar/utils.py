@@ -179,7 +179,7 @@ def build_comment_view(action, status, id, comment):
 }
     return json.dumps(resp)
 
-def build_search_result(action, status, ids, start, end):
+def build_search_result(action, status, ids, start, len):
     resp = {
     "dir":"response",
     "content_type":"seminar",
@@ -189,7 +189,7 @@ def build_search_result(action, status, ids, start, end):
         "data":
         {
             "status":status,
-            "ids":ids[start:end],
+            "ids":ids[start:start + len],
             "total_num":len(ids)
         }
     }

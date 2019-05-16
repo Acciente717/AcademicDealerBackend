@@ -360,7 +360,7 @@ def search(request):
 
     resp = build_search_result(action, STATUS_SUCCESS, response_ids,
                                 json_content_data['offset'],
-                                json_content_data['offset'] + json_content_data['length'])
+                                json_content_data['length'])
 
     http_resp = HttpResponse(resp)
     return http_resp
