@@ -1,4 +1,5 @@
 from django.utils import timezone
+import json
 
 # labinfo status code
 # 0 -- success
@@ -69,142 +70,128 @@ def assert_action(dic, val):
         raise BadJSONType('Invalud value in "content":"action"!')
 
 def gen_fail_response(action, status):
-    response_msg = '''
-{
+    response_msg = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d
+            "status":status
         }
     }
 }
-''' % (action, status)
-    return response_msg
+    return json.dumps(response_msg)
 
 def gen_success_response(action, status, id):
-    response_msg = '''
-{
+    response_msg = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "id":%d
+            "status":status,
+            "id":id
         }
     }
 }
-''' % (action, status, id)
-    return response_msg
+    return json.dumps(response_msg)
 
 def gen_success_response_comment(action, status, id):
-    response_msg = '''
-{
+    response_msg = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "comment_id":%d
+            "status":status,
+            "comment_id":id
         }
     }
 }
-''' % (action, status, id)
-    return response_msg
+    return json.dumps(response_msg)
 
 def build_seminar_view(action, status, id, seminar, members, comments):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "id":%d,
-            "name":"%s",
-            "owner":"%s",
-            "start_date":"%s",
-            "end_date":"%s",
-            "member_total_need":%d,
-            "description":"%s",
-            "create_date":"%s",
-            "modified_date":"%s",
-            "current_members":%s,
-            "comments":%s
+            "status":status,
+            "id":id,
+            "name":seminar.name,
+            "owner":seminar.owner.email,
+            "start_date":str(timezone.localtime(seminar.start_date)),
+            "end_date":str(timezone.localtime(seminar.end_date)),
+            "member_total_need":seminar.member_total_need,
+            "description":seminar.description,
+            "create_date":str(timezone.localtime(seminar.create_date)),
+            "modified_date":str(timezone.localtime(seminar.modified_date)),
+            "current_members":members,
+            "comments":comments
         }
     }
-}''' % (action, status, id, seminar.name, seminar.owner.email,
-        timezone.localtime(seminar.start_date), timezone.localtime(seminar.end_date), seminar.member_total_need,
-        seminar.description, timezone.localtime(seminar.create_date), timezone.localtime(seminar.modified_date),
-        members, comments)
-    return resp
+}
+    return json.dumps(resp)
 
 def build_seminar_list_view(action, status, seminars):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "seminars":%s,
-            "total_num":%d
+            "status":status,
+            "seminars":seminars[:100],
+            "total_num":len(seminars)
         }
     }
-}''' % (action, status, repr(seminars[:100]), len(seminars))
-    return resp
+}
+    return json.dumps(resp)
 
 def build_comment_view(action, status, id, comment):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "comment_id":%d,
-            "owner":"%s",
-            "create_date":"%s",
-            "modified_date":"%s",
-            "description":"%s"
+            "status":status,
+            "comment_id":id,
+            "owner":comment.owner.email,
+            "create_date":str(timezone.localtime(comment.create_date)),
+            "modified_date":str(timezone.localtime(comment.modified_date)),
+            "description":comment.description
         }
     }
-}''' % (action, status, id, comment.owner.email,
-        timezone.localtime(comment.create_date), timezone.localtime(comment.modified_date), comment.description)
-    return resp
+}
+    return json.dumps(resp)
 
 def build_search_result(action, status, ids, start, end):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"seminar",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%s,
-            "ids":%s,
-            "total_num":%s
+            "status":status,
+            "ids":ids[start:end],
+            "total_num":len(ids)
         }
     }
-}''' % (action, status, repr(ids[start:end]), len(ids))
-    return resp
+}
+    return json.dumps(resp)
