@@ -155,7 +155,7 @@ def create(request):
         create_date = timezone.now(),
         modified_date = timezone.now(),
         member_number_limit = json_content_data['member_number_limit'],
-        description = json_content_data['description'].replace('\n', '\\n')
+        description = json_content_data['description']
     )
     new_seminar.save()
 
@@ -187,7 +187,7 @@ def edit(request):
     seminar.start_date = json_content_data['start_date']
     seminar.end_date = json_content_data['end_date']
     seminar.member_total_need = json_content_data['member_total_need']
-    seminar.description = json_content_data['description'].replace('\n', '\\n')
+    seminar.description = json_content_data['description']
     seminar.modified_date = timezone.now()
     seminar.save()
 
@@ -237,10 +237,9 @@ def view(request):
     seminar_id = json_content_data['id']
     seminar = SeminarInfo.objects.get(id=seminar_id)
 
-    members = repr([i.person.email for i in SeminarMember.objects.filter(seminar=seminar)])
-    members = members.replace("'", '"')
+    members = [i.person.email for i in SeminarMember.objects.filter(seminar=seminar)]
     
-    comments = repr([i.id for i in SeminarComment.objects.filter(seminar=seminar).order_by('modified_date')])
+    comments = [i.id for i in SeminarComment.objects.filter(seminar=seminar).order_by('modified_date')]
 
     response_msg = build_seminar_view(action, STATUS_SUCCESS, seminar_id, seminar, members, comments)
 
@@ -360,7 +359,7 @@ def search(request):
 
     resp = build_search_result(action, STATUS_SUCCESS, response_ids,
                                 json_content_data['offset'],
-                                json_content_data['offset'] + json_content_data['length'])
+                                json_content_data['length'])
 
     http_resp = HttpResponse(resp)
     return http_resp
@@ -420,7 +419,7 @@ def comment_edit(request):
         raise PermissionDenied
 
     seminar_comment.modified_date = timezone.now()
-    seminar_comment.description = json_content_data['description'].replace('\n', '\\n')
+    seminar_comment.description = json_content_data['description']
     seminar_comment.save()
 
     seminar = seminar_comment.seminar

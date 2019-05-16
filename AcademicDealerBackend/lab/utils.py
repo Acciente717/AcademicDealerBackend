@@ -1,4 +1,5 @@
 from django.utils import timezone
+import json
 
 # labinfo status code
 # 0 -- success
@@ -47,145 +48,132 @@ def assert_action(dic, val):
         raise BadJSONType('Invalud value in "content":"action"!')
 
 def gen_fail_response(action, status):
-    response_msg = '''
-{
+    response_msg = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d
+            "status":status
         }
     }
 }
-''' % (action, status)
-    return response_msg
+    return json.dumps(response_msg)
 
 def gen_success_response(action, status, id):
-    response_msg = '''
-{
+    response_msg = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "id":%d
+            "status":status,
+            "id":id
         }
     }
 }
-''' % (action, status, id)
-    return response_msg
+    return json.dumps(response_msg)
 
 def gen_success_response_comment(action, status, id):
-    response_msg = '''
-{
+    response_msg = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "comment_id":%d
+            "status":status,
+            "comment_id":id
         }
     }
 }
-''' % (action, status, id)
-    return response_msg
+    return json.dumps(response_msg)
 
 def build_lab_view(action, status, id, lab, comments):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "id":%d,
-            "name":"%s",
-            "school":"%s",#
-            "department":"%s",
-            "owner":"%s",
-            "address":"%s",#
-            "phone":"%s",#
-            "front_page_url":"%s",#
-            "pic_url""%s",#
-            "logo_url""%s",#
-            "supervisors""%s",#
-            "description":"%s",
-            "create_date":"%s",
-            "modified_date":"%s",
-            "comments":%s
+            "status":status,
+            "id":id,
+            "name":lab.name,
+            "school":lab.school,
+            "department":lab.department,
+            "owner":lab.owner.email,
+            "address":lab.address,
+            "phone":lab.phone,
+            "front_page_url":lab.front_page_url,
+            "pic_url":lab.pic_url,
+            "logo_url":lab.logo_url,
+            "supervisors":lab.supervisors,
+            "description":lab.description,
+            "create_date":str(timezone.localtime(lab.create_date)),
+            "modified_date":str(timezone.localtime(lab.modified_date)),
+            "comments":comments
         }
     }
-}''' % (action, status, id, lab.name, lab.school, lab.department, lab.owner.email, lab.address,
-        lab.phone, lab.front_page_url, lab.pic_url, lab.logo_url, lab.supervisors,
-        lab.description, timezone.localtime(lab.create_date), timezone.localtime(lab.modified_date), comments)
-    return resp
+}
+    return json.dumps(resp)
 
 def build_lab_list_view(action, status, labs):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "labs":%s,
-            "total_num":%d
+            "status":status,
+            "labs":labs[:100],
+            "total_num":len(labs)
         }
     }
-}''' % (action, status, repr(labs[:100]), len(labs))
-    return resp
+}
+    return json.dumps(resp)
 
 def build_comment_view(action, status, id, comment):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%d,
-            "comment_id":%d,
-            "owner":"%s",
-            "create_date":"%s",
-            "modified_date":"%s",
-            "description":"%s"
+            "status":status,
+            "comment_id":id,
+            "owner":comment.owner.email,
+            "create_date":str(timezone.localtime(comment.create_date)),
+            "modified_date":str(timezone.localtime(comment.modified_date)),
+            "description":comment.description
         }
     }
-}''' % (action, status, id, comment.owner.email,
-        timezone.localtime(comment.create_date), timezone.localtime(comment.modified_date), comment.description)
-    return resp
+}
+    return json.dumps(resp)
 
 def build_search_result(action, status, ids, start, len):
-    resp = '''\
-{
+    resp = {
     "dir":"response",
     "content_type":"lab",
     "content":
     {
-        "action":"%s",
+        "action":action,
         "data":
         {
-            "status":%s,
-            "ids":%s,
-            "total_num":%d
+            "status":status,
+            "ids":ids[start:start + len],
+            "total_num":len(ids)
         }
     }
-}''' % (action, status, repr(ids[start:start + len]), len(ids))
-    return resp
+}
+    return json.dumps(resp)
