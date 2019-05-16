@@ -169,7 +169,7 @@ def build_project_view(action, status, id, project, members, comments):
             "create_date":str(timezone.localtime(project.create_date)),
             "modified_date":str(timezone.localtime(project.modified_date)),
             "current_members":members,
-            "comments":str(comments)
+            "comments":comments
         }
     }
 }
