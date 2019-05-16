@@ -11,7 +11,6 @@ def check_request(decoded, action):
     assert_action(decoded, action)
 
 def api_dispatch(request, url_action):
-
     dispatcher = {
         'create' : create,
         'edit' : edit,
@@ -155,7 +154,7 @@ def create(request):
         end_date = json_content_data['end_date'],
         create_date = timezone.now(),
         modified_date = timezone.now(),
-        member_total_need = json_content_data['member_total_need'],
+        member_number_limit = json_content_data['member_number_limit'],
         description = json_content_data['description'].replace('\n', '\\n')
     )
     new_seminar.save()

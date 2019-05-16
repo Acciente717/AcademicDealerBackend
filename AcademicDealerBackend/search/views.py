@@ -197,4 +197,5 @@ def api(request):
         print(e)
         http_resp = HttpResponse(build_search_error(STATUS_OTHER_ERROR))
 
+    http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
