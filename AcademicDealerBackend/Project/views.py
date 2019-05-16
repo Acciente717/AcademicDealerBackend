@@ -156,7 +156,7 @@ def create(request):
         create_date = timezone.now(),
         modified_date = timezone.now(),
         member_total_need = json_content_data['member_total_need'],
-        description = json_content_data['description'].replace('\n', '\\n')
+        description = json_content_data['description']
     )
     new_project.save()
 
@@ -194,7 +194,7 @@ def edit(request):
     project.start_date = json_content_data['start_date']
     project.end_date = json_content_data['end_date']
     project.member_total_need = json_content_data['member_total_need']
-    project.description = json_content_data['description'].replace('\n', '\\n')
+    project.description = json_content_data['description']
     project.modified_date = timezone.now()
     project.save()
 
@@ -244,10 +244,9 @@ def view(request):
     project_id = json_content_data['id']
     project = ProjectInfo.objects.get(id=project_id)
 
-    members = repr([i.person.email for i in ProjectMember.objects.filter(project=project)])
-    members = members.replace("'", '"')
+    members = [i.person.email for i in ProjectMember.objects.filter(project=project)]
     
-    comments = repr([i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')])
+    comments = [i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')]
 
     response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
 
