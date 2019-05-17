@@ -1,3 +1,5 @@
+import json
+
 # register status code
 # 0 -- success
 # 1 -- email or nickname already registered
@@ -79,6 +81,32 @@ DELETE_MISSING_FIELD = 3
 DELETE_CORRUPTED_JSON = 4
 DELETE_BAD_TYPE = 5
 DELETE_OTHER_ERROR = 6
+
+# follow/unfollow status code
+# 0 -- success
+# 1 -- no such person
+# 2 -- already follow
+# 3 -- already unfollow
+# 4 -- login fail
+# 5 -- corrupted JSON
+# 6 -- other failure
+
+STATUS_SUCCESS = 0
+STATUS_NO_SUCH_PERSON = 1
+STATUS_ALREADY_FOLLOW = 2
+STATUS_ALREADY_UNFOLLOW = 3
+STATUS_LOGIN_FAIL = 4
+STATUS_CORRUPTED_JSON = 5
+STATUS_OTHER_FAILURE = 6
+
+class NoSuchPerson(RuntimeError):
+    pass
+
+class AlreadyFollow(RuntimeError):
+    pass
+
+class AlreadyUnfollow(RuntimeError):
+    pass
 
 class BadPassword(RuntimeError):
     pass
@@ -234,7 +262,7 @@ def gen_login_fail(dic, errno):
     return resp
 
 def build_user_bio_json(user, labs, projects_create, projects_attend,
-                        seminars_create, seminars_attend, comments):
+                        seminars_create, seminars_attend, comments, follows, follow_by):
     resp = '''\
 {
     "dir":"response",
@@ -266,6 +294,8 @@ def build_user_bio_json(user, labs, projects_create, projects_attend,
                             "seminars_create":%s,
                             "seminars_attend":%s,
                             "comments":%s,
+                            "follows":%s,
+                            "follow_by":%s,
                             "profile":"%s"
                         }
                 }
@@ -275,7 +305,7 @@ def build_user_bio_json(user, labs, projects_create, projects_attend,
         user.title, user.enrollment_date, repr(labs),
         repr(projects_create), repr(projects_attend),
         repr(seminars_create), repr(seminars_attend),
-        repr(comments), user.profile)
+        repr(comments), repr(follows).replace("'", '"'), repr(follow_by).replace("'", '"'), user.profile)
     return resp
 
 def gen_view_fail(dic, errno):
@@ -457,3 +487,18 @@ def gen_delete_fail(dic, errno):
 }
 ''' % (errno)
     return resp
+
+def gen_follow_response(action, status):
+    response_msg = {
+    "dir":"response",
+    "content_type":"account",
+    "content":
+    {
+        "action":action,
+        "data":
+        {
+            "status":status
+        }
+    }
+}
+    return json.dumps(response_msg)
