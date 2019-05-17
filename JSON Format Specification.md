@@ -60,6 +60,8 @@ account = {
                 | edit
                 | delete
                 | view
+                | follow
+                | unfollow
                 )
 }
 ```
@@ -96,6 +98,15 @@ view = {
   seminar_attend = Boolean,
   comment = Boolean
 } -- request to view a given account's view
+
+follow = {
+  person = user_email
+}
+
+unfollow = {
+  person = user_email
+}
+
 ```
 
 #### Response
@@ -181,6 +192,31 @@ view = {
                   ),
   bio
 }
+
+follow = { 
+  status = Number (
+                    0 -- success
+                    1 -- no such person
+                    2 -- already follow
+                    3 -- already unfollow
+                    4 -- login fail
+                    5 -- corrupted JSON
+                    6 -- other failure
+                  )
+}
+
+unfollow = { 
+  status = Number (
+                    0 -- success
+                    1 -- no such person
+                    2 -- already follow
+                    3 -- already unfollow
+                    4 -- login fail
+                    5 -- corrupted JSON
+                    6 -- other failure
+                  )
+}
+
 ```
 
 #### Common definitions
