@@ -347,3 +347,56 @@ def follow(request):
 
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
+
+def unfollow(request):
+    try:
+        action = 'unfollow'
+
+        # decode http content to JSON
+        body = str(request.body, encoding='utf8')
+        decoded = json.loads(body)
+
+        # check the type of JSON query
+        assert_dir(decoded, 'request')
+        assert_content_type(decoded, 'account')
+        assert_account_action(decoded, 'unfollow')
+
+        json_content_data = decoded['content']['data']
+        if 'person' not in json_content_data:
+            raise BadJSONType
+
+        # search database and compare password
+        user = UserAccount.login(decoded['signature'])
+        follow_user = UserAccount.objects.get(email=json_content_data['person'])
+        
+        if not UserFollow.objects.filter(user=user, follow_user=follow_user).exists:
+            raise AlreadyUnfollow
+        
+        follow_relation = UserFollow.objects.filter(user=user, follow_user=follow_user)
+        follow_relation.delete()
+
+    # wrong password
+    except LoginFail:
+        http_resp = HttpResponse(gen_follow_response(action, STATUS_LOGIN_FAIL))
+    
+    except AlreadyUnfollow:
+        http_resp = HttpResponse(gen_follow_response(action, STATUS_ALREADY_UNFOLLOW))
+
+    # bad JSON format
+    except (json.JSONDecodeError, KeyError, BadJSONType):
+        http_resp = HttpResponse(gen_follow_response(action, STATUS_CORRUPTED_JSON))
+
+    except UserAccount.DoesNotExist:
+        http_resp = HttpResponse(gen_follow_response(action, STATUS_NO_SUCH_PERSON))
+
+    # other unknown exceptions
+    except Exception as e:
+        print(e)
+        http_resp = HttpResponse(gen_follow_response(action, STATUS_OTHER_FAILURE))
+
+    # success
+    else:
+        http_resp = HttpResponse(gen_follow_response(action, STATUS_SUCCESS))
+
+    http_resp["Access-Control-Allow-Origin"] = "*"
+    return http_resp
