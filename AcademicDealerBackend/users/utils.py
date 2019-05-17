@@ -262,7 +262,7 @@ def gen_login_fail(dic, errno):
     return resp
 
 def build_user_bio_json(user, labs, projects_create, projects_attend,
-                        seminars_create, seminars_attend, comments):
+                        seminars_create, seminars_attend, comments, follows, follow_by):
     resp = '''\
 {
     "dir":"response",
@@ -294,6 +294,8 @@ def build_user_bio_json(user, labs, projects_create, projects_attend,
                             "seminars_create":%s,
                             "seminars_attend":%s,
                             "comments":%s,
+                            "follows":%s,
+                            "follow_by":%s,
                             "profile":"%s"
                         }
                 }
@@ -303,7 +305,7 @@ def build_user_bio_json(user, labs, projects_create, projects_attend,
         user.title, user.enrollment_date, repr(labs),
         repr(projects_create), repr(projects_attend),
         repr(seminars_create), repr(seminars_attend),
-        repr(comments), user.profile)
+        repr(comments), repr(follows).replace("'", '"'), repr(follow_by).replace("'", '"'), user.profile)
     return resp
 
 def gen_view_fail(dic, errno):

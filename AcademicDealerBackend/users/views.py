@@ -141,9 +141,12 @@ def view(request):
         seminars_attend = []
         comments = []
 
+        follows = [i.follow_user.email for i in UserFollow.objects.filter(user=user)]
+        follow_by = [i.user.email for i in UserFollow.objects.filter(follow_user=user)]
+
         # build response JSON
         resp = build_user_bio_json(user, labs, projects_create, projects_attend,
-                                   seminars_create, seminars_attend, comments)
+                                   seminars_create, seminars_attend, comments, follows, follow_by)
 
     # email not found
     except UserAccount.DoesNotExist:
