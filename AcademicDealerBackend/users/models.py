@@ -27,3 +27,7 @@ class UserAccount(models.Model):
         if user.pw_hash != signature['password_hash']:
             raise LoginFail
         return user
+
+class UserFollow(models.Model):
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='user')
+    follow_user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='follow_user')
