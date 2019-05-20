@@ -317,3 +317,23 @@ class UserEditTests(TransactionTestCase):
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+    # TODO
+    # def test_missing_corrupted_jsons(self):
+    #     self.create_user()
+    #     for req, expected_resp in \
+    #             zip(user_edit_req_normals, user_edit_resp_missing_json_fields):
+    #         resp = self.client.post(reverse('users:edit'), corrupt(req),
+    #                                 content_type='application/json')
+    #         self.assertEqual(resp.status_code, 200)
+    #         self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+
+    # TODO: flaw in json format specification
+    def test_bad_reqs(self):
+        self.create_user()
+        for req, expected_resp in \
+                zip(user_edit_req_bad_reqs, user_edit_resp_bad_reqs):
+            resp = self.client.post(reverse('users:edit'), req,
+                                    content_type='application/json')
+            self.assertEqual(resp.status_code, 200)
+            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
