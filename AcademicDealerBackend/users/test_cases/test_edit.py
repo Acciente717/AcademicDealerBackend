@@ -188,51 +188,52 @@ user_edit_resp_missing_json_fields = [
     __user_edit_resp_missing_json_field
 ]
 
-# missing corrupted JSON
-__user_delete_req_corrupted_json = {
-    "dir": "request",
-    "signature":
-        {
-            "is_user": True,
-            "user_email": "normal0@test.com",
-            "password_hash": "3333"
-        },
-    "content_type": "account",
-    "content":
-        {
-            "action": "delete",
-        }
-}
-
-user_delete_req_corrupted_jsons = [
-    __user_delete_req_corrupted_json
-]
-
-__user_delete_resp_corrupted_json = {
-    "dir": "response",
-    "signature":
-        {
-            "is_user": True,
-            "user_email": "normal0@test.com",
-            "password_hash": "3333"
-        },
-    "content_type": "account",
-    "content":
-        {
-            "action": "delete",
-            "data":
-                {
-                    "status": 4
-                }
-        }
-}
-
-user_delete_resp_corrupted_jsons = [
-    __user_delete_resp_corrupted_json
-]
+# # missing corrupted JSON
+# __user_delete_req_corrupted_json = {
+#     "dir": "request",
+#     "signature":
+#         {
+#             "is_user": True,
+#             "user_email": "normal0@test.com",
+#             "password_hash": "3333"
+#         },
+#     "content_type": "account",
+#     "content":
+#         {
+#             "action": "delete",
+#         }
+# }
+#
+# user_delete_req_corrupted_jsons = [
+#     __user_delete_req_corrupted_json
+# ]
+#
+# __user_delete_resp_corrupted_json = {
+#     "dir": "response",
+#     "signature":
+#         {
+#             "is_user": True,
+#             "user_email": "normal0@test.com",
+#             "password_hash": "3333"
+#         },
+#     "content_type": "account",
+#     "content":
+#         {
+#             "action": "delete",
+#             "data":
+#                 {
+#                     "status": 4
+#                 }
+#         }
+# }
+#
+# user_delete_resp_corrupted_jsons = [
+#     __user_delete_resp_corrupted_json
+# ]
 
 # 5: bad req
-__user_delete_req_bad_req = {
+
+__user_edit_req_bad_req = {
     "dir": "request",
     "signature":
         {
@@ -243,16 +244,16 @@ __user_delete_req_bad_req = {
     "content_type": "bad",
     "content":
         {
-            "action": "delete",
+            "action": "edit",
             "data": {}
         }
 }
 
-user_delete_req_bad_reqs = [
-    __user_delete_req_bad_req
+user_edit_req_bad_reqs = [
+    __user_edit_req_bad_req
 ]
 
-__user_delete_resp_bad_req = {
+__user_edit_resp_bad_req = {
     "dir": "response",
     "signature":
         {
@@ -263,7 +264,7 @@ __user_delete_resp_bad_req = {
     "content_type": "account",
     "content":
         {
-            "action": "delete",
+            "action": "edit",
             "data":
                 {
                     "status": 5
@@ -271,6 +272,6 @@ __user_delete_resp_bad_req = {
         }
 }
 
-user_delete_resp_bad_reqs = [
-    __user_delete_resp_bad_req
+user_edit_resp_bad_reqs = [
+    __user_edit_resp_bad_req
 ]
