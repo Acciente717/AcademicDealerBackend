@@ -16,7 +16,7 @@ class SeminarMember(models.Model):
     person = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
 
 class SeminarComment(models.Model):
-    project = models.ForeignKey(SeminarInfo, on_delete=models.CASCADE)
+    seminar = models.ForeignKey(SeminarInfo, on_delete=models.CASCADE)
     owner = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     create_date = models.DateTimeField()
     modified_date = models.DateTimeField()
