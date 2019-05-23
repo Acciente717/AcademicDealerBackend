@@ -25,7 +25,7 @@ STATUS_LOGIN_FAIL = 5
 STATUS_ALREADY_FULL = 6
 STATUS_NOT_IN = 7
 STATUS_CORRUPTED_JSON = 8
-STATUS_PROJECT_ID_ERROR = 9
+STATUS_SEMINAR_ID_ERROR = 9
 STATUS_ALREADY_IN = 10
 STATUS_IS_OWNER = 11
 STATUS_COMMENT_ID_ERROR = 12
@@ -131,7 +131,7 @@ def build_seminar_view(action, status, id, seminar, members, comments):
             "owner":seminar.owner.email,
             "start_date":str(timezone.localtime(seminar.start_date)),
             "end_date":str(timezone.localtime(seminar.end_date)),
-            "member_total_need":seminar.member_total_need,
+            "member_number_limit":seminar.member_number_limit,
             "description":seminar.description,
             "create_date":str(timezone.localtime(seminar.create_date)),
             "modified_date":str(timezone.localtime(seminar.modified_date)),
