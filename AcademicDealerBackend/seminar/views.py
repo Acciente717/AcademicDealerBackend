@@ -186,7 +186,7 @@ def edit(request):
     seminar.name = json_content_data['name']
     seminar.start_date = json_content_data['start_date']
     seminar.end_date = json_content_data['end_date']
-    seminar.member_total_need = json_content_data['member_total_need']
+    seminar.member_number_limit = json_content_data['member_number_limit']
     seminar.description = json_content_data['description']
     seminar.modified_date = timezone.now()
     seminar.save()
@@ -297,7 +297,7 @@ def join(request):
     )
     seminar_member.save()
     
-    if len(members) >= seminar.member_total_need:
+    if len(members) >= seminar.member_number_limit:
         raise SeminarAlreadyFull
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar.id))
