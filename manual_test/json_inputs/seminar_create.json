@@ -15,7 +15,7 @@
                     "name":"seminar 416666",
                     "start_date":"2020-01-01",
                     "end_date":"2030-01-01",
-                    "member_number_limit":"3",
+                    "member_number_limit":3,
                     "description":"This is a stupid seminar."
                 }
         }
