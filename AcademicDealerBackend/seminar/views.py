@@ -157,9 +157,10 @@ def create(request):
         member_number_limit = json_content_data['member_number_limit'],
         description = json_content_data['description']
     )
-    new_seminar.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_seminar.id))
+    new_seminar.save()
+
     return http_resp
 
 def edit(request):
@@ -189,9 +190,10 @@ def edit(request):
     seminar.member_number_limit = json_content_data['member_number_limit']
     seminar.description = json_content_data['description']
     seminar.modified_date = timezone.now()
-    seminar.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar.id))
+    seminar.save()
+
     return http_resp
 
 def delete(request):
@@ -216,9 +218,9 @@ def delete(request):
     if seminar.owner != user:
         raise PermissionDenied
 
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar_id))
     seminar.delete()
 
-    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar_id))
     return http_resp
 
 def view(request):
@@ -295,12 +297,13 @@ def join(request):
         seminar = seminar,
         person = user,
     )
-    seminar_member.save()
     
     if len(members) >= seminar.member_number_limit:
         raise SeminarAlreadyFull
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar.id))
+    seminar_member.save()
+
     return http_resp
 
 def drop(request):
@@ -334,9 +337,10 @@ def drop(request):
         seminar = seminar,
         person = user,
     )
-    seminar_member.delete()
     
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, seminar.id))
+    seminar_member.delete()
+
     return http_resp
 
 def search(request):
@@ -383,7 +387,6 @@ def comment_create(request):
     seminar = SeminarInfo.objects.get(id=json_content_data['id'])
 
     seminar.modified_date = timezone.now()
-    seminar.save()
 
     seminar_comment = SeminarComment(
         seminar = seminar,
@@ -392,9 +395,11 @@ def comment_create(request):
         modified_date = timezone.now(),
         description = json_content_data['description']
     )
-    seminar_comment.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, seminar_comment.id))
+    seminar_comment.save()
+    seminar.save()
+
     return http_resp
 
 def comment_edit(request):
@@ -420,13 +425,14 @@ def comment_edit(request):
 
     seminar_comment.modified_date = timezone.now()
     seminar_comment.description = json_content_data['description']
-    seminar_comment.save()
 
     seminar = seminar_comment.seminar
     seminar.modified_date = timezone.now()
-    seminar.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, seminar_comment.id))
+    seminar_comment.save()
+    seminar.save()
+
     return http_resp
 
 def comment_delete(request):
@@ -451,9 +457,9 @@ def comment_delete(request):
     if seminar_comment.owner != user:
         raise PermissionDenied
 
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     seminar_comment.delete()
 
-    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     return http_resp
 
 def comment_view(request):
