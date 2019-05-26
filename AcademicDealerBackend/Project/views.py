@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from .models import ProjectInfo, ProjectMember, UserAccount, ProjectComment, LoginFail
 from django.utils import timezone
+from django.db import transaction
 import json
 from .utils import *
 
@@ -11,7 +12,6 @@ def check_request(decoded, action):
     assert_action(decoded, action)
 
 def api_dispatch(request, url_action):
-
     dispatcher = {
         'create' : create,
         'edit' : edit,
@@ -30,15 +30,16 @@ def api_dispatch(request, url_action):
         return HttpResponseNotFound()
 
     try:
-        # decode JSON
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
-        action = decoded['content']['action']
-        if action != url_action:
-            raise BadJSONType
+        with transaction.atomic():
+            # decode JSON
+            body = str(request.body, encoding='utf8')
+            decoded = json.loads(body)
+            action = decoded['content']['action']
+            if action != url_action:
+                raise BadJSONType
 
-        # dispatch to the handler
-        http_resp = dispatcher[action](request)
+            # dispatch to the handler
+            http_resp = dispatcher[action](request)
 
     # bad JSON structure or missing field
     except (json.JSONDecodeError, BadJSONType, KeyError):
@@ -85,7 +86,6 @@ def api_dispatch(request, url_action):
     return http_resp
 
 def comment_api_dispatch(request, url_action):
-
     dispatcher = {
         'create' : comment_create,
         'edit' : comment_edit,
@@ -98,15 +98,16 @@ def comment_api_dispatch(request, url_action):
         return HttpResponseNotFound()
 
     try:
-        # decode JSON
-        body = str(request.body, encoding='utf8')
-        decoded = json.loads(body)
-        action = decoded['content']['action']
-        if action != 'comment_' + url_action:
-            raise BadJSONType
+        with transaction.atomic():
+            # decode JSON
+            body = str(request.body, encoding='utf8')
+            decoded = json.loads(body)
+            action = decoded['content']['action']
+            if action != 'comment_' + url_action:
+                raise BadJSONType
 
-        # dispatch to the handler
-        http_resp = dispatcher[url_action](request)
+            # dispatch to the handler
+            http_resp = dispatcher[url_action](request)
 
     # bad JSON format
     except (json.JSONDecodeError, BadJSONType, KeyError):
