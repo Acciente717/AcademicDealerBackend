@@ -298,6 +298,7 @@ status = Number ( 0 -- success
                 | 2 -- permission denied
                 | 3 -- other failure
                 )
+
 ```
 
 #### Common definitions
@@ -341,6 +342,7 @@ lab_bio = {
   address = String,
   profile = String           -- markdown format
 }
+
 ```
 
 ### Project
@@ -353,6 +355,7 @@ project = {
   action = Encode data,
   data = Object ( create | edit | delete | view | join | drop | search )
 }
+
 ```
 
 #### Request
@@ -380,6 +383,7 @@ search = {
 	offset = Number, -- indicate the start number offset of query
 	length = Number  -- inidcate the number of query results displayed
 }
+
 ```
 
 #### Response
@@ -425,6 +429,7 @@ status = Number (
                   9 -- user already in the project
                   10 -- other failure
                 )
+
 ```
 
 #### Common definitions
@@ -445,6 +450,7 @@ project_info = {
   comments = [ comment_id = Number ],
   description = String, -- markdown format
 }
+
 ```
 
 ### Seminar
@@ -457,6 +463,7 @@ seminar = {
   action = Encode data,
   data = Object ( create | edit | delete | view | join | drop )
 }
+
 ```
 
 #### Request
@@ -476,10 +483,10 @@ view = { }
 join = { }
 
 drop = { }
+
 ```
 
 #### Response
-
 
 ```haskell
 when data.dir == "response"
@@ -515,6 +522,7 @@ status = Number ( 0 -- success
                 | 2 -- permission denied
                 | 3 -- other failure
                 )
+
 ```
 
 #### Common definitions
@@ -535,6 +543,7 @@ seminar_info = {
   comments = [ comment_id = Number ],
   description = String -- markdown format
 }
+
 ```
 
 ### Project Comment
@@ -545,8 +554,9 @@ prefix data.content
 comment = {
   id = Number,  -- when creating, id == project_id
   action = Encode data,
-  data = Object ( create | edit | delete | view )
+  data = Object ( comment_create | comment_edit | comment_delete | comment_view )
 }
+
 ```
 
 #### Request
@@ -555,23 +565,24 @@ comment = {
 when data.dir == "request"
 prefix data.content.comment.data
 
-create = {
+comment_create = {
+  id = Number, -- seminar id
+  description = String  -- markdown format
+}
+
+comment_edit = {
   comment_id = Number,
   description = String  -- markdown format
 }
 
-edit = {
-  comment_id = Number,
-  description = String  -- markdown format
-}
-
-delete = { 
+comment_delete = { 
   comment_id = Number
 }
 
-view = {
+comment_view = {
   comment_id = Number
 }
+
 ```
 
 #### Response
@@ -580,28 +591,28 @@ view = {
 when data.dir == "response"
 prefix data.content.comment.data
 
-create = { status, comment_id = Number }
+comment_create = { status, comment_id = Number }
 
-edit = { status, comment_id }
+comment_edit = { status, comment_id }
 
-delete = { status, comment_id }
+comment_delete = { status, comment_id }
 
-view = { status, comment_id }
+comment_view = { status, comment_id }
 
-status = Number (
-                  0 -- success
-                  1 -- no project
-                  2 -- project outdated
-                  3 -- permission deny
-                  4 -- user login fail
-                  5 -- project quota is full 
-                  6 -- user not in the project
-                  7 -- json corrupt
-                  8 -- project id error
-                  9 -- user already in the project
-                  10 -- other failure
-                  11 -- comment id error
+status = Number ( 0 -- success
+                | 1 -- other failure
+                | 2 -- project outdated
+                | 3 -- permission deny
+                | 4 -- user login fail
+                | 5 -- project quota is full 
+                | 6 -- user not in the project
+                | 7 -- json corrupt
+                | 8 -- project id error
+                | 9 -- user already in the project
+                | 10 -- comment id error
+                | 11 -- owner is trying to drop out of project
                 )
+
 ```
 
 ### Generic Search
@@ -624,6 +635,7 @@ status = Number (
         "curr_page": Number, --本次请求的页面号
     }
 }
+
 ```
 
 #### Response
@@ -649,5 +661,6 @@ status = ( 0 -- success
 				 | 1 -- other error
 				 | 2 -- bad json
 				 )
+
 ```
 

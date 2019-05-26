@@ -161,15 +161,16 @@ def create(request):
         member_total_need = json_content_data['member_total_need'],
         description = json_content_data['description']
     )
-    new_project.save()
 
     project_member = ProjectMember(
         project = new_project,
         person = user,
     )
-    project_member.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
+    new_project.save()
+    project_member.save()
+
     return http_resp
 
 def edit(request):
@@ -199,9 +200,10 @@ def edit(request):
     project.member_total_need = json_content_data['member_total_need']
     project.description = json_content_data['description']
     project.modified_date = timezone.now()
-    project.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
+    project.save()
+
     return http_resp
 
 def delete(request):
@@ -226,9 +228,9 @@ def delete(request):
     if project.owner != user:
         raise PermissionDenied
 
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
     project.delete()
 
-    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
     return http_resp
 
 def view(request):
@@ -302,12 +304,13 @@ def join(request):
         project = project,
         person = user,
     )
-    project_member.save()
-    
+
     if len(members) >= project.member_total_need:
         raise ProjectAlreadyFull
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
+    project_member.save()
+
     return http_resp
 
 def drop(request):
@@ -344,9 +347,10 @@ def drop(request):
         project = project,
         person = user,
     )
-    project_member.delete()
     
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
+    project_member.delete()
+
     return http_resp
 
 def search(request):
@@ -393,7 +397,6 @@ def comment_create(request):
     project = ProjectInfo.objects.get(id=json_content_data['id'])
 
     project.modified_date = timezone.now()
-    project.save()
 
     project_comment = ProjectComment(
         project = project,
@@ -402,9 +405,11 @@ def comment_create(request):
         modified_date = timezone.now(),
         description = json_content_data['description']
     )
-    project_comment.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
+    project_comment.save()
+    project.save()
+
     return http_resp
 
 def comment_edit(request):
@@ -430,13 +435,14 @@ def comment_edit(request):
 
     project_comment.modified_date = timezone.now()
     project_comment.description = json_content_data['description']
-    project_comment.save()
 
     project = project_comment.project
     project.modified_date = timezone.now()
-    project.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
+    project_comment.save()
+    project.save()
+
     return http_resp
 
 def comment_delete(request):
@@ -461,9 +467,10 @@ def comment_delete(request):
     if project_comment.owner != user:
         raise PermissionDenied
 
-    project_comment.delete()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
+    project_comment.delete()
+
     return http_resp
 
 def comment_view(request):

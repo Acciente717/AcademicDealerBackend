@@ -142,9 +142,10 @@ def create(request):
         modified_date = timezone.now(),
         description = json_content_data['description']
     )
-    new_lab.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_lab.id))
+    new_lab.save()
+
     return http_resp
 
 def edit(request):
@@ -180,9 +181,10 @@ def edit(request):
     lab.supervisors = json_content_data['supervisors'],
     lab.modified_date = timezone.now(),
     lab.description = json_content_data['description']
-    lab.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, lab.id))
+    lab.save()
+
     return http_resp
 
 def delete(request):
@@ -207,9 +209,9 @@ def delete(request):
     if lab.owner != user:
         raise PermissionDenied
 
+    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, lab_id))
     lab.delete()
 
-    http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, lab_id))
     return http_resp
 
 def view(request):
@@ -294,7 +296,6 @@ def comment_create(request):
     lab = LabInfo.objects.get(id=json_content_data['id'])
 
     lab.modified_date = timezone.now()
-    lab.save()
 
     lab_comment = LabComment(
         lab = lab,
@@ -303,9 +304,11 @@ def comment_create(request):
         modified_date = timezone.now(),
         description = json_content_data['description']
     )
-    lab_comment.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, lab_comment.id))
+    lab_comment.save()
+    lab.save()
+
     return http_resp
 
 def comment_edit(request):
@@ -331,13 +334,14 @@ def comment_edit(request):
 
     lab_comment.modified_date = timezone.now()
     lab_comment.description = json_content_data['description']
-    lab_comment.save()
 
     lab = lab_comment.lab
     lab.modified_date = timezone.now()
-    lab.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, lab_comment.id))
+    lab_comment.save()
+    lab.save()
+
     return http_resp
 
 def comment_delete(request):
@@ -362,9 +366,9 @@ def comment_delete(request):
     if lab_comment.owner != user:
         raise PermissionDenied
 
+    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     lab_comment.delete()
 
-    http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     return http_resp
 
 def comment_view(request):
