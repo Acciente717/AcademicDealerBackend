@@ -336,4 +336,4 @@ class UserEditTests(TransactionTestCase):
             resp = self.client.post(reverse('users:edit'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
-            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+            self.assertDictEqual(expected_resp, json.loads(resp.contengt.decode('utf-8')))
