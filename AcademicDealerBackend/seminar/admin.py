@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import SeminarInfo, SeminarMember, SeminarComment
 
-# Register your models here.
+admin.site.register(SeminarInfo)
+admin.site.register(SeminarMember)
+admin.site.register(SeminarComment)
