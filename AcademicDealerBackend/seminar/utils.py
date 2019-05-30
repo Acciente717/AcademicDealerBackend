@@ -57,6 +57,9 @@ class UserNotIn(RuntimeError):
 class UserIsOwner(RuntimeError):
     pass
 
+class CommentIDError(RuntimeError):
+    pass
+
 def assert_dir(dic, val):
     if dic['dir'] != val:
         raise BadJSONType('Invalid value in "dir"!')
