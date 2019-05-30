@@ -341,3 +341,11 @@ class UserEditTests(TransactionTestCase):
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.contengt.decode('utf-8')))
+
+
+# test core functions mentioned in ../../manual_test
+# in progress
+class CoreFunctionalTest(TransactionTestCase):
+    def test_core_functions(self):
+        pass
+
