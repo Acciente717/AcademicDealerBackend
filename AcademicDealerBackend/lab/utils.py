@@ -116,8 +116,8 @@ def build_lab_view(action, status, id, lab, comments):
             "logo_url":lab.logo_url,
             "supervisors":lab.supervisors,
             "description":lab.description,
-            "create_date":str(timezone.localtime(lab.create_date)),
-            "modified_date":str(timezone.localtime(lab.modified_date)),
+            "create_date":str(lab.create_date),
+            "modified_date":str(lab.modified_date),
             "comments":comments
         }
     }
@@ -153,8 +153,8 @@ def build_comment_view(action, status, id, comment):
             "status":status,
             "comment_id":id,
             "owner":comment.owner.email,
-            "create_date":str(timezone.localtime(comment.create_date)),
-            "modified_date":str(timezone.localtime(comment.modified_date)),
+            "create_date":str(comment.create_date),
+            "modified_date":str(comment.modified_date),
             "description":comment.description
         }
     }

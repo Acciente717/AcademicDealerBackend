@@ -129,12 +129,12 @@ def build_seminar_view(action, status, id, seminar, members, comments):
             "id":id,
             "name":seminar.name,
             "owner":seminar.owner.email,
-            "start_date":str(timezone.localtime(seminar.start_date)),
-            "end_date":str(timezone.localtime(seminar.end_date)),
+            "start_date":str(seminar.start_date),
+            "end_date":str(seminar.end_date),
             "member_number_limit":seminar.member_number_limit,
             "description":seminar.description,
-            "create_date":str(timezone.localtime(seminar.create_date)),
-            "modified_date":str(timezone.localtime(seminar.modified_date)),
+            "create_date":str(seminar.create_date),
+            "modified_date":str(seminar.modified_date),
             "current_members":members,
             "comments":comments
         }
@@ -171,8 +171,8 @@ def build_comment_view(action, status, id, comment):
             "status":status,
             "comment_id":id,
             "owner":comment.owner.email,
-            "create_date":str(timezone.localtime(comment.create_date)),
-            "modified_date":str(timezone.localtime(comment.modified_date)),
+            "create_date":str(comment.create_date),
+            "modified_date":str(comment.modified_date),
             "description":comment.description
         }
     }

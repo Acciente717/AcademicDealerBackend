@@ -54,7 +54,7 @@ def search_owned_project(keywords, owner_email, search_description, search_outda
 
     lst = [ {"content_type" : "project",
              "id" : i.id,
-             "date" : timezone.localtime(i.modified_date) } for i in title_result]
+             "date" : i.modified_date } for i in title_result]
     return lst
 
 def search_attended_project(keywords, attender_email, search_description, search_outdated):
@@ -96,7 +96,7 @@ def search_attended_project(keywords, attender_email, search_description, search
 
     lst = [ {"content_type" : "project",
               "id" : i.project.id,
-              "date" : timezone.localtime(i.project.modified_date) } for i in title_result]
+              "date" : i.project.modified_date } for i in title_result]
     return lst
 
 def search_owned_seminar(keywords, owner_email, search_description, search_outdated):
@@ -138,7 +138,7 @@ def search_owned_seminar(keywords, owner_email, search_description, search_outda
 
     lst = [ {"content_type" : "seminar",
              "id" : i.id,
-             "date" : timezone.localtime(i.modified_date) } for i in title_result]
+             "date" : i.modified_date } for i in title_result]
     return lst
 
 def search_attended_seminar(keywords, attender_email, search_description, search_outdated):
@@ -180,7 +180,7 @@ def search_attended_seminar(keywords, attender_email, search_description, search
 
     lst = [ {"content_type" : "seminar",
               "id" : i.seminar.id,
-              "date" : timezone.localtime(i.seminar.modified_date) } for i in title_result]
+              "date" : i.seminar.modified_date } for i in title_result]
     return lst
 
 def search_owned_lab(keywords, owner_email, search_description, search_outdated):
@@ -218,7 +218,7 @@ def search_owned_lab(keywords, owner_email, search_description, search_outdated)
 
     lst = [ {"content_type" : "lab",
              "id" : i.id,
-             "date" : timezone.localtime(i.modified_date) } for i in title_result]
+             "date" : i.modified_date } for i in title_result]
     return lst
 
 def build_search_result(total_results, total_page_num, result_list):

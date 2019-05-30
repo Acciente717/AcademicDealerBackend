@@ -127,12 +127,12 @@ def build_project_view(action, status, id, project, members, comments):
             "id":id,
             "name":project.name,
             "owner":project.owner.email,
-            "start_date":str(timezone.localtime(project.start_date)),
-            "end_date":str(timezone.localtime(project.end_date)),
+            "start_date":str(project.start_date),
+            "end_date":str(project.end_date),
             "member_total_need":project.member_total_need,
             "description":project.description,
-            "create_date":str(timezone.localtime(project.create_date)),
-            "modified_date":str(timezone.localtime(project.modified_date)),
+            "create_date":str(project.create_date),
+            "modified_date":str(project.modified_date),
             "current_members":members,
             "comments":comments
         }
@@ -169,8 +169,8 @@ def build_comment_view(action, status, id, comment):
             "status":status,
             "comment_id":id,
             "owner":comment.owner.email,
-            "create_date":str(timezone.localtime(comment.create_date)),
-            "modified_date":str(timezone.localtime(comment.modified_date)),
+            "create_date":str(comment.create_date),
+            "modified_date":str(comment.modified_date),
             "description":comment.description
         }
     }
