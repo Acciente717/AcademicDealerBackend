@@ -170,16 +170,16 @@ def edit(request):
         raise PermissionDenied
 
 
-    lab.name = json_content_data['name'],
-    lab.school = json_content_data['school'],
-    lab.department = json_content_data['department'],
-    lab.address = json_content_data['address'],
-    lab.phone = json_content_data['phone'],
-    lab.front_page_url = json_content_data['front_page_url'],
-    lab.pic_url = json_content_data['pic_url'],
-    lab.logo_url = json_content_data['logo_url'],
-    lab.supervisors = json_content_data['supervisors'],
-    lab.modified_date = timezone.now(),
+    lab.name = json_content_data['name']
+    lab.school = json_content_data['school']
+    lab.department = json_content_data['department']
+    lab.address = json_content_data['address']
+    lab.phone = json_content_data['phone']
+    lab.front_page_url = json_content_data['front_page_url']
+    lab.pic_url = json_content_data['pic_url']
+    lab.logo_url = json_content_data['logo_url']
+    lab.supervisors = json_content_data['supervisors']
+    lab.modified_date = timezone.now()
     lab.description = json_content_data['description']
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, lab.id))
