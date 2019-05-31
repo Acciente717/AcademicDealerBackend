@@ -235,8 +235,8 @@ class UserDeleteTests(TransactionTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
-    # TODO: bug in views.py:delete requires fixing:
-    # when fields are not used, missing cannot be detected
+    # TODO: bugs in views.py:delete require fixing:
+    # TODO: when fields are not used, missing cannot be detected
     def test_missing_json_fields(self):
         self.create_user()
         for req, expected_resp in \
@@ -309,6 +309,9 @@ class UserEditTests(TransactionTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
+
+    # TODO: Bugs in user.edit require fixing:
+    # TODO: missing edit.data field is not properly handled
     def test_missing_json_fields(self):
         self.create_user()
         for req, expected_resp in \
@@ -318,7 +321,7 @@ class UserEditTests(TransactionTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
-    # TODO
+
     # def test_missing_corrupted_jsons(self):
     #     self.create_user()
     #     for req, expected_resp in \
@@ -329,6 +332,7 @@ class UserEditTests(TransactionTestCase):
     #         self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
     # TODO: flaw in json format specification
+    # TODO: same as user.delete
     def test_bad_reqs(self):
         self.create_user()
         for req, expected_resp in \
@@ -336,4 +340,12 @@ class UserEditTests(TransactionTestCase):
             resp = self.client.post(reverse('users:edit'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
-            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+            self.assertDictEqual(expected_resp, json.loads(resp.contengt.decode('utf-8')))
+
+
+# test core functions mentioned in ../../manual_test
+# in progress
+class CoreFunctionalTest(TransactionTestCase):
+    def test_core_functions(self):
+        pass
+

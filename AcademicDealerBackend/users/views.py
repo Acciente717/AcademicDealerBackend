@@ -295,6 +295,7 @@ def delete(request):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def follow(request):
     try:
         action = 'follow'
@@ -315,20 +316,20 @@ def follow(request):
         # search database and compare password
         user = UserAccount.login(decoded['signature'])
         follow_user = UserAccount.objects.get(email=json_content_data['person'])
-        
+
         if UserFollow.objects.filter(user=user, follow_user=follow_user).exists():
             raise AlreadyFollow
-        
+
         follow_relation = UserFollow(
-            user = user,
-            follow_user = follow_user
+            user=user,
+            follow_user=follow_user
         )
         follow_relation.save()
 
     # wrong password
     except LoginFail:
         http_resp = HttpResponse(gen_follow_response(action, STATUS_LOGIN_FAIL))
-    
+
     except AlreadyFollow:
         http_resp = HttpResponse(gen_follow_response(action, STATUS_ALREADY_FOLLOW))
 
@@ -351,6 +352,7 @@ def follow(request):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def unfollow(request):
     try:
         action = 'unfollow'
@@ -371,17 +373,17 @@ def unfollow(request):
         # search database and compare password
         user = UserAccount.login(decoded['signature'])
         follow_user = UserAccount.objects.get(email=json_content_data['person'])
-        
+
         if not UserFollow.objects.filter(user=user, follow_user=follow_user).exists:
             raise AlreadyUnfollow
-        
+
         follow_relation = UserFollow.objects.filter(user=user, follow_user=follow_user)
         follow_relation.delete()
 
     # wrong password
     except LoginFail:
         http_resp = HttpResponse(gen_follow_response(action, STATUS_LOGIN_FAIL))
-    
+
     except AlreadyUnfollow:
         http_resp = HttpResponse(gen_follow_response(action, STATUS_ALREADY_UNFOLLOW))
 

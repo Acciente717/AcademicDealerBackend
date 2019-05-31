@@ -14,7 +14,7 @@ __user_edit_req_normal = {
             "action": "edit",
             "data": {
                     "real_name": "Donald Trump",
-                    "nick_name": "potato",
+                    "nick_name": "apple",
                     "pic_url": "",
                     "school": "Paradize",
                     "department": "White House",
@@ -117,7 +117,7 @@ __user_edit_req_wrong_password = {
 }
 
 user_edit_req_wrong_passwords = [
-    __user_edit_req_normal
+    __user_edit_req_wrong_password
 ]
 
 __user_edit_resp_wrong_password = {
@@ -267,7 +267,7 @@ __user_edit_resp_bad_req = {
             "action": "edit",
             "data":
                 {
-                    "status": 5
+                    "status": 6
                 }
         }
 }
