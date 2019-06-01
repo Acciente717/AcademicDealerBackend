@@ -193,6 +193,25 @@ view = {
   bio
 }
 
+-- If the status number indicates one of the following
+-- 		corrupted JSON
+--		missing field
+-- 		bad req/resp or content_type etc. in JSON
+--		other failure
+-- then the response JSON has the structure
+-- {
+--    "dir":"response",
+--    "signature": { "is_user":false },
+--    "content_type":"account",
+--    "content":{
+--            "action":"%s",
+--            "data": { "status":%d }
+--    }
+-- }, where the action is filled according to the URL.
+-- Otherwize, the signature field will be filled with the user's signature.
+
+
+
 follow = { 
   status = Number (
                     0 -- success
@@ -216,7 +235,6 @@ unfollow = {
                     6 -- other failure
                   )
 }
-
 ```
 
 #### Common definitions
