@@ -150,9 +150,7 @@ __user_edit_missing_json_field = {
     "dir": "request",
     "signature":
         {
-            "is_user": True,
-            "user_email": "normal0@test.com",
-            "password_hash": "3333"
+            "is_user": False
         },
     "content_type": "account",
     "content":
@@ -169,9 +167,7 @@ __user_edit_resp_missing_json_field = {
     "dir": "response",
     "signature":
         {
-            "is_user": True,
-            "user_email": "normal0@test.com",
-            "password_hash": "3333"
+            "is_user": False
         },
     "content_type": "account",
     "content":
@@ -257,9 +253,7 @@ __user_edit_resp_bad_req = {
     "dir": "response",
     "signature":
         {
-            "is_user": True,
-            "user_email": "normal0@test.com",
-            "password_hash": "3333"
+            "is_user": False
         },
     "content_type": "account",
     "content":

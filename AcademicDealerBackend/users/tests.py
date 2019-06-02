@@ -264,7 +264,9 @@ class UserDeleteTests(TransactionTestCase):
             resp = self.client.post(reverse('users:delete'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
-            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+            out = json.loads(resp.content.decode('utf-8'))
+            print(out)
+            self.assertDictEqual(expected_resp,out)
 
 
 class UserEditTests(TransactionTestCase):
@@ -319,7 +321,9 @@ class UserEditTests(TransactionTestCase):
             resp = self.client.post(reverse('users:edit'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
-            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+            out = json.loads(resp.content.decode('utf-8'))
+            print(out)
+            self.assertDictEqual(expected_resp, out)
 
 
     # def test_missing_corrupted_jsons(self):
@@ -340,7 +344,9 @@ class UserEditTests(TransactionTestCase):
             resp = self.client.post(reverse('users:edit'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
-            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+            out = json.loads(resp.content.decode('utf-8'))
+            print(out)
+            self.assertDictEqual(expected_resp, out)
 
 
 # test core functions mentioned in ../../manual_test
