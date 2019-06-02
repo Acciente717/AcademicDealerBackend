@@ -11,6 +11,7 @@ import sys
 import traceback
 import re
 
+
 class UsersRegisterTests(TransactionTestCase):
 
     def test_register_normals(self):
@@ -358,17 +359,22 @@ class CoreFunctionalTest(TransactionTestCase):
         input_dir = "/home/tp/AcademicDealerBackend/manual_test/json_inputs/"
         li = list(os.walk(input_dir))
         for file in li[0][2]:
-            print(file)
             try:
+                print("dealing with " + file)
+                finding = re.findall(r"(.*)_(.*)\d*\..*", file)
+                target, op = finding[0]
+
                 with open(input_dir + file) as in_file:
+
                     json_in = json.load(in_file)
                     json_str_out = self.client.post(
-                        reverse('users:register'), json_in,
+                        reverse(target + ':' + op), json_in,
                         content_type='application/json').content.decode('utf-8')
                     with open("/home/tp/AcademicDealerBackend/manual_test/json_outputs/resp_" +
                               file, "w") as outfile:
                         outfile.write(json_str_out)
             except Exception as e:
+                print(file + ' -> ' + str(finding))
                 traceback.print_exc()
 
     def test_core_functions(self):
