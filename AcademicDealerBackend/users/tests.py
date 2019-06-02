@@ -6,7 +6,10 @@ from .test_cases.test_reset_password import *
 from .test_cases.test_delete import *
 from .test_cases.test_edit import *
 import json
-
+import os
+import sys
+import traceback
+import re
 
 class UsersRegisterTests(TransactionTestCase):
 
@@ -20,7 +23,8 @@ class UsersRegisterTests(TransactionTestCase):
             resp = self.client.post(reverse('users:register'), req,
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
-            self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
+            self.assertDictEqual(expected_resp,
+                                 json.loads(resp.content.decode('utf-8')))
 
     def test_register_duplicates(self):
         '''
@@ -265,8 +269,8 @@ class UserDeleteTests(TransactionTestCase):
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             out = json.loads(resp.content.decode('utf-8'))
-            print(out)
-            self.assertDictEqual(expected_resp,out)
+            # print(out)
+            self.assertDictEqual(expected_resp, out)
 
 
 class UserEditTests(TransactionTestCase):
@@ -311,7 +315,6 @@ class UserEditTests(TransactionTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
-
     # TODO: Bugs in user.edit require fixing:
     # TODO: missing edit.data field is not properly handled
     def test_missing_json_fields(self):
@@ -322,9 +325,8 @@ class UserEditTests(TransactionTestCase):
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             out = json.loads(resp.content.decode('utf-8'))
-            print(out)
+            # print(out)
             self.assertDictEqual(expected_resp, out)
-
 
     # def test_missing_corrupted_jsons(self):
     #     self.create_user()
@@ -345,13 +347,30 @@ class UserEditTests(TransactionTestCase):
                                     content_type='application/json')
             self.assertEqual(resp.status_code, 200)
             out = json.loads(resp.content.decode('utf-8'))
-            print(out)
+            # print(out)
             self.assertDictEqual(expected_resp, out)
 
 
 # test core functions mentioned in ../../manual_test
 # in progress
 class CoreFunctionalTest(TransactionTestCase):
-    def test_core_functions(self):
-        pass
+    def get_resp(self):
+        input_dir = "/home/tp/AcademicDealerBackend/manual_test/json_inputs/"
+        li = list(os.walk(input_dir))
+        for file in li[0][2]:
+            print(file)
+            try:
+                with open(input_dir + file) as in_file:
+                    json_in = json.load(in_file)
+                    json_str_out = self.client.post(
+                        reverse('users:register'), json_in,
+                        content_type='application/json').content.decode('utf-8')
+                    with open("/home/tp/AcademicDealerBackend/manual_test/json_outputs/resp_" +
+                              file, "w") as outfile:
+                        outfile.write(json_str_out)
+            except Exception as e:
+                traceback.print_exc()
 
+    def test_core_functions(self):
+        self.get_resp()
+        1
