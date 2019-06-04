@@ -1,1 +1,1 @@
-{"content": {"data": {"status": 1}, "action": "follow"}, "content_type": "account", "dir": "response"}
+{"content": {"action": "follow", "data": {"status": 1}}, "dir": "response", "content_type": "account"}
