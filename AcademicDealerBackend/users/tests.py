@@ -405,5 +405,5 @@ class CoreFunctionalTest(TransactionTestCase):
 
     def test_core_functions(self):
         self.get_resp()
-
+        time.sleep(20)
         pass

@@ -12,11 +12,12 @@ STATUS_SUCCESS = 0
 STATUS_OTHER_ERROR = 1
 STATUS_CORRUPTED_JSON = 2
 
+
 class BadJSONType(RuntimeError):
     pass
 
-def search_owned_project(keywords, owner_email, search_description, search_outdated):
 
+def search_owned_project(keywords, owner_email, search_description, search_outdated):
     ### search title
     keywords = keywords.split(' ')
     title_result = ProjectInfo.objects.all()
@@ -52,13 +53,13 @@ def search_owned_project(keywords, owner_email, search_description, search_outda
         # union with previous result
         title_result = title_result.union(description_result)
 
-    lst = [ {"content_type" : "project",
-             "id" : i.id,
-             "date" : i.modified_date } for i in title_result]
+    lst = [{"content_type": "project",
+            "id": i.id,
+            "date": i.modified_date} for i in title_result]
     return lst
 
-def search_attended_project(keywords, attender_email, search_description, search_outdated):
 
+def search_attended_project(keywords, attender_email, search_description, search_outdated):
     ### search title
     keywords = keywords.split(' ')
     title_result = ProjectMember.objects.all()
@@ -94,13 +95,13 @@ def search_attended_project(keywords, attender_email, search_description, search
         # union with previous result
         title_result = title_result.union(description_result)
 
-    lst = [ {"content_type" : "project",
-              "id" : i.project.id,
-              "date" : i.project.modified_date } for i in title_result]
+    lst = [{"content_type": "project",
+            "id": i.project.id,
+            "date": i.project.modified_date} for i in title_result]
     return lst
 
-def search_owned_seminar(keywords, owner_email, search_description, search_outdated):
 
+def search_owned_seminar(keywords, owner_email, search_description, search_outdated):
     ### search title
     keywords = keywords.split(' ')
     title_result = SeminarInfo.objects.all()
@@ -136,13 +137,13 @@ def search_owned_seminar(keywords, owner_email, search_description, search_outda
         # union with previous result
         title_result = title_result.union(description_result)
 
-    lst = [ {"content_type" : "seminar",
-             "id" : i.id,
-             "date" : i.modified_date } for i in title_result]
+    lst = [{"content_type": "seminar",
+            "id": i.id,
+            "date": i.modified_date} for i in title_result]
     return lst
 
-def search_attended_seminar(keywords, attender_email, search_description, search_outdated):
 
+def search_attended_seminar(keywords, attender_email, search_description, search_outdated):
     ### search title
     keywords = keywords.split(' ')
     title_result = SeminarMember.objects.all()
@@ -178,13 +179,13 @@ def search_attended_seminar(keywords, attender_email, search_description, search
         # union with previous result
         title_result = title_result.union(description_result)
 
-    lst = [ {"content_type" : "seminar",
-              "id" : i.seminar.id,
-              "date" : i.seminar.modified_date } for i in title_result]
+    lst = [{"content_type": "seminar",
+            "id": i.seminar.id,
+            "date": i.seminar.modified_date} for i in title_result]
     return lst
 
-def search_owned_lab(keywords, owner_email, search_description, search_outdated):
 
+def search_owned_lab(keywords, owner_email, search_description, search_outdated):
     ### search title
     keywords = keywords.split(' ')
     title_result = LabInfo.objects.all()
@@ -216,35 +217,37 @@ def search_owned_lab(keywords, owner_email, search_description, search_outdated)
         # union with previous result
         title_result = title_result.union(description_result)
 
-    lst = [ {"content_type" : "lab",
-             "id" : i.id,
-             "date" : i.modified_date } for i in title_result]
+    lst = [{"content_type": "lab",
+            "id": i.id,
+            "date": i.modified_date} for i in title_result]
     return lst
+
 
 def build_search_result(total_results, total_page_num, result_list):
     dic = {
-    "dir": "response",
-    "content_type": "search",
-    "status": STATUS_SUCCESS,
-    "content": {
-        "total_results" : total_results,
-        "last_page": total_page_num,
-        "result": result_list
+        "dir": "response",
+        "content_type": "search",
+        "status": STATUS_SUCCESS,
+        "content": {
+            "total_results": total_results,
+            "last_page": total_page_num,
+            "result": result_list
+        }
     }
-}
     return json.dumps(dic)
+
 
 def build_search_error(error_code):
     dic = {
-    "dir": "response",
-    "content_type": "search",
-    "status": error_code,
-    "content": {}
-}
+        "dir": "response",
+        "content_type": "search",
+        "status": error_code,
+        "content": {}
+    }
     return json.dumps(dic)
 
-def api(request):
 
+def api(request):
     try:
         body = str(request.body, encoding='utf8')
         decoded = json.loads(body)
@@ -266,17 +269,17 @@ def api(request):
 
             # search for owned projects
             projects = search_owned_project(keywords, email,
-                                            search_description, search_outdated)\
+                                            search_description, search_outdated) \
                 if search_project else []
 
             # search for owned labs
             labs = search_owned_lab(keywords, email,
-                                    search_description, search_outdated)\
+                                    search_description, search_outdated) \
                 if search_lab else []
 
             # search for seminars
             seminars = search_owned_seminar(keywords, email,
-                                            search_description, search_outdated)\
+                                            search_description, search_outdated) \
                 if search_seminar else []
 
 
@@ -284,7 +287,7 @@ def api(request):
 
             # search for attended projects
             projects = search_attended_project(keywords, email,
-                                               search_description, search_outdated)\
+                                               search_description, search_outdated) \
                 if search_project else []
 
             # no lab can be attended
@@ -292,19 +295,19 @@ def api(request):
 
             # search for attended seminars
             seminars = search_attended_seminar(keywords, email,
-                                               search_description, search_outdated)\
+                                               search_description, search_outdated) \
                 if search_seminar else []
         else:
             raise BadJSONType
 
         # build response
         full_list = projects + labs + seminars
-        full_list.sort(key=lambda x : x['date'], reverse=True)
-        full_list = [ { "content_type" : i['content_type'],
-                        "id" : i['id'] }
-                    for i in full_list[request_page * 10 : (request_page + 1) * 10] ]
+        full_list.sort(key=lambda x: x['date'], reverse=True)
+        full_list = [{"content_type": i['content_type'],
+                      "id": i['id']}
+                     for i in full_list[request_page * 10: (request_page + 1) * 10]]
         resp = build_search_result(len(full_list), len(full_list) // 10,
-                                full_list)
+                                   full_list)
         http_resp = HttpResponse(resp)
 
     # bad JSON structure or missing field
