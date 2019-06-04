@@ -6,25 +6,27 @@ from django.db import transaction
 import json
 from .utils import *
 
+
 def check_request(decoded, action):
     assert_dir(decoded, 'request')
     assert_content_type(decoded, 'project')
     assert_action(decoded, action)
 
+
 def api_dispatch(request, url_action):
     dispatcher = {
-        'create' : create,
-        'edit' : edit,
-        'delete' : delete,
-        'view' : view,
-        'join' : join,
-        'drop' : drop,
-        'search' : search,
-        'getall' : getall
+        'create': create,
+        'edit': edit,
+        'delete': delete,
+        'view': view,
+        'join': join,
+        'drop': drop,
+        'search': search,
+        'getall': getall
     }
 
     action = "unknown action"
-    
+
     # return 404 when the url is invalid
     if url_action not in dispatcher:
         return HttpResponseNotFound()
@@ -60,7 +62,7 @@ def api_dispatch(request, url_action):
     # user is already in the participant list
     except UserAlreadyIn:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_ALREADY_IN))
-    
+
     # user is not in the project participant list
     except UserNotIn:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_NOT_IN))
@@ -72,7 +74,7 @@ def api_dispatch(request, url_action):
     # project ID is wrong or missing
     except (ProjectIDError, ProjectInfo.DoesNotExist):
         http_resp = HttpResponse(gen_fail_response(action, STATUS_PROJECT_ID_ERROR))
-    
+
     # project owner is trying to drop out
     except UserIsOwner:
         http_resp = HttpResponse(gen_fail_response(action, STATUS_IS_OWNER))
@@ -85,12 +87,13 @@ def api_dispatch(request, url_action):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def comment_api_dispatch(request, url_action):
     dispatcher = {
-        'create' : comment_create,
-        'edit' : comment_edit,
-        'delete' : comment_delete,
-        'view' : comment_view
+        'create': comment_create,
+        'edit': comment_edit,
+        'delete': comment_delete,
+        'view': comment_view
     }
 
     # return 404 when the url is invalid
@@ -138,6 +141,7 @@ def comment_api_dispatch(request, url_action):
     http_resp["Access-Control-Allow-Origin"] = "*"
     return http_resp
 
+
 def create(request):
     action = 'create'
 
@@ -150,27 +154,28 @@ def create(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     new_project = ProjectInfo(
-        name = json_content_data['name'],
-        owner = user,
-        start_date = json_content_data['start_date'],
-        end_date = json_content_data['end_date'],
-        create_date = timezone.now(),
-        modified_date = timezone.now(),
-        member_total_need = json_content_data['member_total_need'],
-        description = json_content_data['description']
+        name=json_content_data['name'],
+        owner=user,
+        start_date=json_content_data['start_date'],
+        end_date=json_content_data['end_date'],
+        create_date=timezone.now(),
+        modified_date=timezone.now(),
+        member_total_need=json_content_data['member_total_need'],
+        description=json_content_data['description']
     )
     new_project.save()
 
     project_member = ProjectMember(
-        project = new_project,
-        person = user,
+        project=new_project,
+        person=user,
     )
     project_member.save()
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, new_project.id))
     return http_resp
+
 
 def edit(request):
     action = 'edit'
@@ -184,10 +189,10 @@ def edit(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "id" not in json_content_data:
         raise ProjectIDError
-    
+
     project = ProjectInfo.objects.get(id=json_content_data['id'])
 
     if project.owner != user:
@@ -204,6 +209,7 @@ def edit(request):
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
     return http_resp
 
+
 def delete(request):
     action = 'delete'
 
@@ -216,10 +222,10 @@ def delete(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "id" not in json_content_data:
         raise ProjectIDError
-    
+
     project_id = json_content_data['id']
     project = ProjectInfo.objects.get(id=project_id)
 
@@ -231,6 +237,7 @@ def delete(request):
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project_id))
     return http_resp
 
+
 def view(request):
     action = 'view'
 
@@ -240,21 +247,22 @@ def view(request):
     check_request(decoded, 'view')
 
     json_content_data = decoded['content']['data']
-    
+
     if "id" not in json_content_data:
         raise ProjectIDError
-    
+
     project_id = json_content_data['id']
     project = ProjectInfo.objects.get(id=project_id)
 
     members = [i.person.email for i in ProjectMember.objects.filter(project=project)]
-    
+
     comments = [i.id for i in ProjectComment.objects.filter(project=project).order_by('modified_date')]
 
     response_msg = build_project_view(action, STATUS_SUCCESS, project_id, project, members, comments)
 
     http_resp = HttpResponse(response_msg)
     return http_resp
+
 
 def getall(request):
     action = 'getall'
@@ -271,6 +279,7 @@ def getall(request):
     http_resp = HttpResponse(response_msg)
     return http_resp
 
+
 def join(request):
     action = 'join'
 
@@ -283,32 +292,33 @@ def join(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "id" not in json_content_data:
         raise ProjectIDError
-    
+
     project_id = json_content_data['id']
     project = ProjectInfo.objects.get(id=project_id)
 
     if timezone.now() > project.end_date:
         raise ProjectOutdated
-    
+
     members = [i.person for i in ProjectMember.objects.filter(project=project)]
 
     if user in members:
         raise UserAlreadyIn
-    
+
     project_member = ProjectMember(
-        project = project,
-        person = user,
+        project=project,
+        person=user,
     )
     project_member.save()
-    
+
     if len(members) >= project.member_total_need:
         raise ProjectAlreadyFull
 
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
     return http_resp
+
 
 def drop(request):
     action = 'drop'
@@ -322,32 +332,33 @@ def drop(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "id" not in json_content_data:
         raise ProjectIDError
-    
+
     project_id = json_content_data['id']
     project = ProjectInfo.objects.get(id=project_id)
 
     if timezone.now() > project.end_date:
         raise ProjectOutdated
-    
+
     members = [i.person for i in ProjectMember.objects.filter(project=project)]
 
     if user not in members:
         raise UserNotIn
-    
+
     if user == project.owner:
         raise UserIsOwner
-    
+
     project_member = ProjectMember.objects.get(
-        project = project,
-        person = user,
+        project=project,
+        person=user,
     )
     project_member.delete()
-    
+
     http_resp = HttpResponse(gen_success_response(action, STATUS_SUCCESS, project.id))
     return http_resp
+
 
 def search(request):
     action = 'search'
@@ -364,15 +375,16 @@ def search(request):
         query_sets.append(ProjectInfo.objects.filter(name__contains=keyword))
     query_sets = [set(i) for i in query_sets]
     intersected_query_result = set.intersection(*query_sets)
-    
+
     response_ids = [i.id for i in intersected_query_result]
 
     resp = build_search_result(action, STATUS_SUCCESS, response_ids,
-                                json_content_data['offset'],
-                                json_content_data['length'])
+                               json_content_data['offset'],
+                               json_content_data['length'])
 
     http_resp = HttpResponse(resp)
     return http_resp
+
 
 def comment_create(request):
     action = 'comment_create'
@@ -386,26 +398,27 @@ def comment_create(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "id" not in json_content_data:
         raise ProjectIDError
-    
+
     project = ProjectInfo.objects.get(id=json_content_data['id'])
 
     project.modified_date = timezone.now()
     project.save()
 
     project_comment = ProjectComment(
-        project = project,
-        owner = user,
-        create_date = timezone.now(),
-        modified_date = timezone.now(),
-        description = json_content_data['description']
+        project=project,
+        owner=user,
+        create_date=timezone.now(),
+        modified_date=timezone.now(),
+        description=json_content_data['description']
     )
     project_comment.save()
 
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
     return http_resp
+
 
 def comment_edit(request):
     action = 'comment_edit'
@@ -419,10 +432,10 @@ def comment_edit(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "comment_id" not in json_content_data:
         raise CommentIDError
-    
+
     project_comment = ProjectComment.objects.get(id=json_content_data['comment_id'])
 
     if project_comment.owner != user:
@@ -439,6 +452,7 @@ def comment_edit(request):
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, project_comment.id))
     return http_resp
 
+
 def comment_delete(request):
     action = 'comment_delete'
 
@@ -451,10 +465,10 @@ def comment_delete(request):
     user = UserAccount.login(json_signature)
 
     json_content_data = decoded['content']['data']
-    
+
     if "comment_id" not in json_content_data:
         raise CommentIDError
-    
+
     comment_id = json_content_data['comment_id']
     project_comment = ProjectComment.objects.get(id=comment_id)
 
@@ -466,6 +480,7 @@ def comment_delete(request):
     http_resp = HttpResponse(gen_success_response_comment(action, STATUS_SUCCESS, comment_id))
     return http_resp
 
+
 def comment_view(request):
     action = 'comment_view'
 
@@ -475,10 +490,10 @@ def comment_view(request):
     check_request(decoded, 'comment_view')
 
     json_content_data = decoded['content']['data']
-    
+
     if "comment_id" not in json_content_data:
         raise CommentIDError
-    
+
     comment_id = json_content_data['comment_id']
     project_comment = ProjectComment.objects.get(id=comment_id)
 
