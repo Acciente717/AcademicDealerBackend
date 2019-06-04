@@ -1,0 +1,16 @@
+{
+    "dir":"response",
+    "signature":
+        {
+            "is_user":false
+        },
+    "content_type":"account",
+    "content":
+        {
+            "action":"register",
+            "data":
+                {
+                    "status":5
+                }
+        }
+}
