@@ -1,16 +1,21 @@
-from django.test import TransactionTestCase
-from django.urls import reverse
-from .test_cases.test_register import *
-from .test_cases.test_login import *
-from .test_cases.test_reset_password import *
-from .test_cases.test_delete import *
-from .test_cases.test_edit import *
 import json
 import os
 import sys
 import traceback
 import re
 import time
+# from ..seminar.tests import SeminarTestsAgent
+
+from django.test import TransactionTestCase
+from django.urls import reverse
+
+from .test_cases.test_register import *
+from .test_cases.test_login import *
+from .test_cases.test_reset_password import *
+from .test_cases.test_delete import *
+from .test_cases.test_edit import *
+
+from django.test import Client
 
 
 class UsersRegisterTests(TransactionTestCase):
@@ -204,9 +209,9 @@ class UserDeleteTests(TransactionTestCase):
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
     def test_normals(self):
-        '''
-        Normal. Should be successful.
-        '''
+
+        # Normal. Should be successful.
+
         self.create_user()
 
         for req, expected_resp in \
@@ -229,6 +234,7 @@ class UserDeleteTests(TransactionTestCase):
                 zip(user_delete_req_wrong_passwords, user_delete_resp_wrong_passwords):
             resp = self.client.post(reverse('users:delete'), req,
                                     content_type='application/json')
+            # print(resp.content.decode('utf-8'))
             self.assertEqual(resp.status_code, 200)
             self.assertDictEqual(expected_resp, json.loads(resp.content.decode('utf-8')))
 
@@ -353,11 +359,15 @@ class UserEditTests(TransactionTestCase):
             self.assertDictEqual(expected_resp, out)
 
 
+# absolute path accomandated to local tests
+input_dir = "/home/tp/AcademicDealerBackend/manual_test/json_inputs/"
+output_dir = "/home/tp/AcademicDealerBackend/manual_test/json_outputs/resp_"
+
+
 # test core functions mentioned in ../../manual_test
 # in progress
 class CoreFunctionalTest(TransactionTestCase):
     def get_resp(self):
-        input_dir = "/home/tp/AcademicDealerBackend/manual_test/json_inputs/"
         filelist = sorted(list(os.walk(input_dir))[0][2])
         ignorelist = ["2comment_create.json"]
         for file in filelist:
@@ -376,20 +386,24 @@ class CoreFunctionalTest(TransactionTestCase):
                     print(target + ':' + op)
                     print("\n ##### input #####\n")
                     print(json_in)
+                    # json_str_out = Client().post(
+                    #     "/%s/%s" % (target, op), json_in,
+                    #     content_type='application/json').content.decode('utf-8')
                     json_str_out = self.client.post(
                         reverse(target + ':' + op), json_in,
                         content_type='application/json').content.decode('utf-8')
                     print("\n ##### output ####\n")
                     print(json_str_out)
-                    with open("/home/tp/AcademicDealerBackend/manual_test/json_outputs/resp_" +
+                    with open(output_dir +
                               file, "w") as outfile:
                         outfile.write(json_str_out)
             except Exception as e:
-                print("Exception at " + file + ' -> ' + str(finding))
-                print(traceback.format_exc())
+                print("At " + file + ' -> ' + str(finding))
+                # print(traceback.format_exc())
                 # time.sleep(1)
         pass
 
     def test_core_functions(self):
         self.get_resp()
-        1
+
+        pass

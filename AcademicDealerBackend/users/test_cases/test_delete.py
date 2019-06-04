@@ -105,7 +105,7 @@ __user_delete_req_wrong_password = {
 }
 
 user_delete_req_wrong_passwords = [
-    __user_delete_req_normal
+    __user_delete_req_wrong_password
 ]
 
 __user_delete_resp_wrong_password = {
@@ -128,7 +128,7 @@ __user_delete_resp_wrong_password = {
 }
 
 user_delete_resp_wrong_passwords = [
-    __user_delete_resp_normal
+    __user_delete_resp_wrong_password
 ]
 
 # missing json field
