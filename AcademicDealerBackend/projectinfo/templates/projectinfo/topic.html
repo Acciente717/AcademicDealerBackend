@@ -10,6 +10,13 @@
 <p> {{ topic.created_date }}</p>
 <p> {{ topic.modified_date }}</p>
 
+<h2>Search in Topic {{ topic.topic_text }}</h2>
+<form method="get">
+  {% csrf_token %}
+  {{ search_form.as_p }}
+  <button type="submit" name="project_search" value="yes">Search</button>
+</form>
+
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 {% for project in topic.project_set.all %}
@@ -22,11 +29,9 @@
     </li>
 {% endfor %}
 
-{# <a href="{% url 'create_project' topic_id=topic.id %}">Want to create a new topic?</a> #}
-
 <h2>Create Project in Topic {{ topic.topic_text }}</h2>
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Create this Project</button>
+  <button type="submit" name="project_create" value="yes">Create this Project</button>
 </form>

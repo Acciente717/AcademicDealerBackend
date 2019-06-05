@@ -1,0 +1,27 @@
+{% if user.is_authenticated %}
+  <h2>Hi {{ user.username }}!</h2>
+  <a href="{% url 'logout' %}">logout</a>
+{% else %}
+  <p>You are not logged in</p>
+  <a href="{% url 'login' %}">login</a>
+{% endif %}
+
+<h1>{{ topic.topic_text }}</h1>
+<p> {{ topic.created_date }}</p>
+<p> {{ topic.modified_date }}</p>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<h2>Search Results in Topic {{ topic.topic_text }}</h2>
+
+{% for project in search_result %}
+    <li>
+        <a href="{% url 'project' topic_id=topic.id project_id=project.id %}">{{ project.title }}</a>
+        <p>{{ project.text }}</p>
+        <p>{{ project.owner }}</p>
+        <p>{{ project.created_date }}</p>
+        <p>{{ project.modified_date }}</p>
+    </li>
+{% endfor %}
+
+</form>

@@ -44,6 +44,11 @@ AUTH_USER_MODEL = 'accounts.MyUser'
 INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'projectinfo.apps.ProjectinfoConfig',
+    'users.apps.UsersConfig',
+    'Project.apps.ProjectConfig',
+    'seminar.apps.SeminarConfig',
+    'search.apps.SearchConfig',
+    'lab.apps.LabConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +61,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware', TEMPORARILY DISABLED, NOT SAFE
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -128,7 +133,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

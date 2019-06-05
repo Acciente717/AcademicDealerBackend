@@ -1,0 +1,18 @@
+{
+    "dir":"request",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"haha@163.com",
+            "password_hash":"23333333"
+        },
+    "content_type":"project",
+    "content":
+        {
+            "action":"comment_delete",
+            "data":
+                {
+                    "comment_id":8
+                }
+        }
+}

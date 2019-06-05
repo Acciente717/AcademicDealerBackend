@@ -1,0 +1,19 @@
+{
+    "dir":"request",
+    "signature":
+        {
+            "is_user":true,
+            "user_email":"haha@163.com",
+            "password_hash":"23333333"
+        },
+    "content_type":"seminar",
+    "content":
+        {
+            "action":"comment_create",
+            "data":
+                {
+                    "id":1,
+                    "description":"comment.comment.comment."
+                }
+        }
+}

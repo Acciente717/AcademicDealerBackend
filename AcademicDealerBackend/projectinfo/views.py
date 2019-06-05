@@ -1,12 +1,13 @@
-from django.http import HttpResponseRedirect
 from django.http import Http404
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.shortcuts import render_to_response
 from datetime import datetime
+from django.db.models import Q
 
-from .forms import ProjectForm, ReplyForm
+from .forms import ProjectForm, ReplyForm, ProjectSearchForm
 from .models import Topic, Project, Reply
 
 class IndexView(generic.ListView):
@@ -27,6 +28,7 @@ class TopicDisplayView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = ProjectForm()
+        context['search_form'] = ProjectSearchForm()
         return context
 
 @method_decorator(login_required, name='dispatch')
@@ -51,9 +53,26 @@ class TopicCreateProjectView(generic.CreateView):
     def get_success_url(self):
         return reverse('project', kwargs={'topic_id': self.object.topic_id, 'project_id':self.object.id})
 
+class TopicSearchProjectView(generic.FormView):
+    form_class = ProjectSearchForm
+    pk_url_kwarg = 'topic_id'
+    # template_name = 'projectinfo/topic_search_project.html'
+
+    def get(self, request, *args, **kwargs):
+        cur_topic = Topic.objects.get(id=self.kwargs.get('topic_id'))
+        search_key = self.request.GET["search_key"]
+        
+        search_result = Project.objects.filter(topic=cur_topic)
+        search_result = search_result.filter(Q(title__contains=search_key) | Q(text__contains=search_key))
+
+        return render_to_response('projectinfo/topic_search_project.html', {'search_result': search_result, 'topic': cur_topic, })
+
 class TopicDetail(generic.View):
     def get(self, request, *args, **kwargs):
-        view = TopicDisplayView.as_view()
+        if "search_key" in self.request.GET:
+            view = TopicSearchProjectView.as_view()
+        else:
+            view = TopicDisplayView.as_view()
         return view(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
